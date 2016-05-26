@@ -1,6 +1,7 @@
 package etf.bg.ac.rs.zp2016.gui;
 
 import etf.bg.ac.rs.zp2016.alg.*;
+import java.security.InvalidParameterException;
 
 
 import java.awt.BorderLayout;
@@ -207,24 +208,28 @@ public class GenerateKeyWind  extends JFrame{
 				}
 				else{
 					try{
-					cert = new CertificateClass();
+						cert = new CertificateClass();
 					
-					cert.setSerialNum(Integer.parseInt(serNum.getText()));
-					cert.setLength(Integer.parseInt(keysize.getText()));
-					cert.setDays(Integer.parseInt(period.getText()));
-					cert.setCN(CN.getText());
-					cert.setOU(OU.getText());
-					cert.setO(O.getText());
-					cert.setL(L.getText());
-					cert.setST(ST.getText());
-					cert.setC(C.getText());
-					cert.setE(E.getText());
-					secW = new KeyPairView(cert);
-					secW.setVisible(true);
-					dispose();
-				}catch( NumberFormatException exc){
-					System.out.println("uso");
-					errorLabel.setText("Serial number, Key size and Period must be integer!!");
+						cert.setSerialNum(Integer.parseInt(serNum.getText()));
+						cert.setLength(Integer.parseInt(keysize.getText()));
+						cert.setDays(Integer.parseInt(period.getText()));
+						cert.setCN(CN.getText());
+						cert.setOU(OU.getText());
+						cert.setO(O.getText());
+						cert.setL(L.getText());
+						cert.setST(ST.getText());
+						cert.setC(C.getText());
+						cert.setE(E.getText());
+						secW = new KeyPairView(cert);
+						secW.setVisible(true);
+						dispose();
+					}catch( NumberFormatException exc){
+						
+						errorLabel.setText("Serial number, Key size and Period must be integer!!");
+						errorLabel.setFont(new Font(null,Font.BOLD, 10));
+						errorLabel.setBackground(Color.RED);
+				}catch (InvalidParameterException e2) {
+					errorLabel.setText("RSA keys must be >= 512 bits long <= 16384");
 					errorLabel.setFont(new Font(null,Font.BOLD, 10));
 					errorLabel.setBackground(Color.RED);
 				}
