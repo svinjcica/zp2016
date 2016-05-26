@@ -1,5 +1,8 @@
 package etf.bg.ac.rs.zp2016.gui;
 
+import etf.bg.ac.rs.zp2016.alg.*;
+
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -14,6 +17,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 
+
+
 public class GenerateKeyWind  extends JFrame{
 	public TextField keysize, period, serNum,CN, OU, O, L, ST, C, E, constraints, issuerAlternativeName, keyUsage;
 	private JButton confirmB;
@@ -21,12 +26,15 @@ public class GenerateKeyWind  extends JFrame{
 	public JComboBox<String> yesNoConstrains = new JComboBox<String>();
 	public JComboBox<String> yesNoIssuerAlternativeName= new JComboBox<String>();
 	public JComboBox<String> yesNoKeyUsage = new JComboBox<String>();
-	
+	public CertificateClass cert;
+	public KeyPairView secW;
+	Label errorLabel = new Label("BILO STA");
 	
 	
 	public Panel clientText(int i){
 		Panel plate = new Panel(new GridLayout(1, 1));
-		Label myLabel = new Label("", Label.LEFT);
+		
+		Label myLabel = new Label();
 		if( i == 1)
 			myLabel = new Label("User information: ", Label.LEFT);
 		else if(i == 2)
@@ -58,7 +66,6 @@ public class GenerateKeyWind  extends JFrame{
 		Label l2 = new Label("Enter certificate version: ", Label.LEFT);
 		l2.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(l2);
-		keysize = new TextField();
 		plate.add(solutionBox);
 		
 		Label l3 = new Label("Enter validity period: \n(in days from today)", Label.LEFT);
@@ -183,9 +190,47 @@ public class GenerateKeyWind  extends JFrame{
 		confirmB = new JButton ("Confirm");
 		confirmB.setSize(2,2);
 		confirmB.setFont(new Font(null,Font.BOLD, 15));
-		plate.add(new Label());
+		plate.add(errorLabel, BorderLayout.NORTH);
 		confirmB.setBackground(Color.ORANGE);
 		plate.add(confirmB);
+		
+		confirmB.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				if(keysize.getText().length()==0|| period.getText().length()==0 || serNum.getText().length()==0 || CN.getText().length()==0 || OU.getText().length()==0 || O.getText().length()==0|| L.getText().length()==0 || ST.getText().length()==0 || C.getText().length()==0|| E.getText().length()==0){
+						
+					errorLabel.setText("You didn't input all value!!");
+					errorLabel.setBackground(Color.RED);
+					
+				}
+				else{
+					try{
+					cert = new CertificateClass();
+					
+					cert.setSerialNum(Integer.parseInt(serNum.getText()));
+					cert.setLength(Integer.parseInt(keysize.getText()));
+					cert.setDays(Integer.parseInt(period.getText()));
+					cert.setCN(CN.getText());
+					cert.setOU(OU.getText());
+					cert.setO(O.getText());
+					cert.setL(L.getText());
+					cert.setST(ST.getText());
+					cert.setC(C.getText());
+					cert.setE(E.getText());
+					secW = new KeyPairView(cert);
+					secW.setVisible(true);
+					dispose();
+				}catch( NumberFormatException exc){
+					System.out.println("uso");
+					errorLabel.setText("Serial number, Key size and Period must be integer!!");
+					errorLabel.setFont(new Font(null,Font.BOLD, 10));
+					errorLabel.setBackground(Color.RED);
+				}
+				}
+			}
+		});
 		
 		return plate;
 	}
@@ -195,8 +240,12 @@ public class GenerateKeyWind  extends JFrame{
 		super("X.509 Authentication Service: GENERATE NEW KEY PAIR");
 		setBounds(300,150,700,580);
 		setResizable(false);
+		errorLabel = new Label(" ", Label.LEFT);
+		errorLabel.setBackground(Color.ORANGE);
+		errorLabel.setFont(new Font(null,Font.BOLD, 15));
 		add(label1(),BorderLayout.NORTH);
 		add(optionalEx(),BorderLayout.EAST);
+		
 		add(plateNextB(),BorderLayout.SOUTH);
 		// TODO Auto-generated constructor stub
 	}
