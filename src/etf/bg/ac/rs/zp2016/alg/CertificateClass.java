@@ -1,54 +1,159 @@
-package etf.bg.ac.rs.zp2016.alg;
+package zp2016;
 
-
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.math.BigInteger;
-import java.util.*;
+import java.nio.charset.Charset;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Date;
 
-
-
-import sun.security.x509.*;
-import java.security.cert.*;
-import java.security.*;
-
+import sun.security.util.DerValue;
+import sun.security.x509.AlgorithmId;
+import sun.security.x509.BasicConstraintsExtension;
+import sun.security.x509.CertificateAlgorithmId;
+import sun.security.x509.CertificateExtensions;
+import sun.security.x509.CertificateIssuerName;
+import sun.security.x509.CertificateSerialNumber;
+import sun.security.x509.CertificateSubjectName;
+import sun.security.x509.CertificateValidity;
+import sun.security.x509.CertificateVersion;
+import sun.security.x509.CertificateX509Key;
+import sun.security.x509.Extension;
+import sun.security.x509.KeyUsageExtension;
+import sun.security.x509.SubjectAlternativeNameExtension;
+import sun.security.x509.X500Name;
+import sun.security.x509.X509CertImpl;
+import sun.security.x509.X509CertInfo;
+import java.io.File;
 
 
 public class CertificateClass  
 {
 	
-	/*. Кориснику треба понудити да унесе
-	следеће информације: величину кључа, верзију сертификата, период важења, серијски
-	број и информације о кориснику (CN, OU, O, L, ST, C, E). Верзију сертификата треба
-	ограничити само на v3
-	
-	ориснику треба понудити да опционо може да унесе и следеће
-	екстензије: основна ограничења (basic constraints), алтернативна имена издаваоца
-	сертификата (issuer alternative name) и коришћење кључа (key usage). Омогућити за
-	екстензије да се означи да ли су критичне или не. Корисник треба да има могућност да у
-	апликацији сачува генерисани пар кључева под жељеним именом. */
 
-	
 	private int length, days; //VERSION SHOULD BE JUST V3
     private Date notBefore, noAfter;
     private int serialNum;
     private String CN, OU, O, L, ST, C, E;
-    private ArrayList<String> altNames;
-    private boolean altNamesCritical;
+    //za dodavanje-PLUS GETERI I SETERI ZA PRIVATE POLJA
+    private String altNames;
+    private boolean altNamesCritical,keyUsageCritical,basicCritical;
+    public boolean[] keyUsagePolicies = new boolean[9];
+    //0-certificate signing,1-CRL sign,2-data  encipherment,3-decipher only,4-digital signature,5-encipher only,6-key agreement,7-key encipherment,8-non repudiation
+    private int pathLength;
+    private boolean CA;
+    private boolean altNameExt,basicExt,keyExt;//indikatori za unesene ekstenzije
     
+    private KeyPair pair;
     
-    
-    public String getDNames()
+    public boolean isAltNameExt() {
+		return altNameExt;
+	}
+
+
+	public void setAltNameExt(boolean altNameExt) {
+		this.altNameExt = altNameExt;
+	}
+
+
+	public boolean isBasicExt() {
+		return basicExt;
+	}
+
+
+	public void setBasicExt(boolean basicExt) {
+		this.basicExt = basicExt;
+	}
+
+
+	public boolean isKeyExt() {
+		return keyExt;
+	}
+
+
+	public void setKeyExt(boolean keyExt) {
+		this.keyExt = keyExt;
+	}
+
+
+	public int getPathLength() {
+		return pathLength;
+	}
+
+
+	public void setPathLength(int pathLength) {
+		this.pathLength = pathLength;
+	}
+
+
+	public boolean isBasicCritical() {
+		return basicCritical;
+	}
+
+
+	public void setBasicCritical(boolean basicCritical) {
+		this.basicCritical = basicCritical;
+	}
+
+
+	public boolean isCA() {
+		return CA;
+	}
+
+
+	public void setCA(boolean cA) {
+		CA = cA;
+	}
+
+
+	public String getDNames()
     {
     	return "CN="+ CN + ", " + "OU=" + OU + ", " + "O=" + O + ", " + "L=" + L + ", " + "ST=" + ST + ", " + "C=" + C + ", " + "emailAddress=" + E;
     }
 
     
-   public X509Certificate generateCertificate() throws GeneralSecurityException, IOException
+    public boolean isKeyUsageCritical() {
+		return keyUsageCritical;
+	}
+
+
+	public void setKeyUsageCritical(boolean keyUsageCritical) {
+		this.keyUsageCritical = keyUsageCritical;
+	}
+
+
+	public boolean[] getKeyUsagePolicies() {
+		return keyUsagePolicies;
+	}
+
+
+	public void setKeyUsagePolicies(boolean[] keyUsagePolicies) {
+		this.keyUsagePolicies = keyUsagePolicies;
+	}
+
+
+	X509Certificate generateCertificate() throws GeneralSecurityException, IOException
     {
     	
     	KeyPairClass gen = new KeyPairClass();
 		KeyPair pair = gen.genPairOfKeys(length);
 		PrivateKey priv = pair.getPrivate();
+		
+		this.pair = pair;
 		
 		 X509CertInfo info = new X509CertInfo();
 		 
@@ -66,27 +171,41 @@ public class CertificateClass
 		  info.set(X509CertInfo.ISSUER, new CertificateIssuerName(owner));
 		  info.set(X509CertInfo.KEY, new CertificateX509Key(pair.getPublic()));
 		  info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3));
-		 // X509CertInfo.EXTENSIONS, new Certificate
 		  
 		  AlgorithmId alg = new AlgorithmId(AlgorithmId.sha1WithRSAEncryption_OIW_oid);
 		  info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(alg));
 		  
 		  CertificateExtensions ext = new CertificateExtensions();
-		 /* ext.set(SubjectKeyIdentifierExtension.NAME,
-		            new SubjectKeyIdentifierExtension(new KeyIdentifier(pair.getPublic()).getIdentifier()));
-		    // CA public key is the same as our public key (self signed)
-		    ext.set(AuthorityKeyIdentifierExtension.NAME,
-		            new AuthorityKeyIdentifierExtension(new KeyIdentifier(pair.getPublic()), null, null));*/
-
-		 /* GeneralNames g = new GeneralNames();
-		  GeneralName gr= new GeneralName(new X500Name(altNames.get(0)));
-		  g.add(gr);
-		    
-		    ext.set(SubjectAlternativeNameExtension.NAME, new SubjectAlternativeNameExtension(true,g));
-       
 	
-		 
-		    info.set(X509CertInfo.EXTENSIONS, ext);*/
+		  /*GeneralNames g = new GeneralNames();
+ 	      GeneralName gr= new GeneralName(new DerValue(DerValue.tag_OctetString,"AAAAaaaaaaaaaaa".getBytes()));
+	 	  g.add(gr);
+		    
+		   ext.set(SubjectAlternativeNameExtension.NAME, new SubjectAlternativeNameExtension(g));*/
+         
+		  //setting Key usage extension
+		  if(this.isKeyExt())
+		  {
+		   KeyUsageExtension kue = new KeyUsageExtension(keyUsagePolicies);
+		   ext.set(KeyUsageExtension.NAME, new KeyUsageExtension(this.isKeyUsageCritical(),kue.getValue()));
+		  }
+		  
+		  //setting Alternative names extension-glup nacin ali trenutno ne znam drugacije :(
+		  if(this.isAltNameExt())
+		  {
+		   SubjectAlternativeNameExtension san = new SubjectAlternativeNameExtension();
+		   byte[] altNamesValue = new DerValue(DerValue.tag_OctetString, altNames.getBytes()).toByteArray();
+		   ext.set(SubjectAlternativeNameExtension.NAME, new Extension(san.getExtensionId(),altNamesCritical,altNamesValue));
+		  }
+		  
+		 // setting Basic contraints extension
+		 if(this.isBasicExt())
+		  {
+		  BasicConstraintsExtension be = new BasicConstraintsExtension(CA,pathLength);
+		  ext.set(BasicConstraintsExtension.NAME,  new BasicConstraintsExtension(this.isBasicCritical(),be.getValue()));
+		  }
+		
+		  info.set(X509CertInfo.EXTENSIONS, ext);
 		  
 		  // Sign the certificate to identify the algorithm that's used.
 		  X509CertImpl certificate = new X509CertImpl(info);
@@ -99,19 +218,28 @@ public class CertificateClass
 		  info.set(CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, alg);
 		  certificate = new X509CertImpl(info);
 		  certificate.sign(priv, algorithm);
-		  
+		  	  
 		  return certificate;	 	
     	
     }
-    
-    
+	
      
-    public ArrayList<String> getAltNames() {
+    public KeyPair getPair() {
+		return pair;
+	}
+
+
+	public void setPair(KeyPair pair) {
+		this.pair = pair;
+	}
+
+
+	public String getAltNames() {
 		return altNames;
 	}
 
 
-	public void setAltNames(ArrayList<String> altNames) {
+	public void setAltNames(String altNames) {
 		this.altNames = altNames;
 	}
 
@@ -146,15 +274,11 @@ public class CertificateClass
 	public Date getNotBefore() {
 		return notBefore;
 	}
-	/*public void setNotBefore(Date notBefore) {
-		this.notBefore = notBefore;
-	}*/
+
 	public Date getNoAfter() {
 		return noAfter;
 	}
-	/*public void setNoAfter(Date noAfter) {
-		this.noAfter = noAfter;
-	}*/
+	
 	public int getSerialNum() {
 		return serialNum;
 	}
@@ -204,158 +328,4 @@ public class CertificateClass
 		E = e;
 	}
 	
-   // private String [] issuerAlternativeNames;
-
-	/*@Override
-	public Set<String> getCriticalExtensionOIDs() 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public byte[] getExtensionValue(String arg0)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public Set<String> getNonCriticalExtensionOIDs() 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public boolean hasUnsupportedCriticalExtension()
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-	@Override
-	public void checkValidity() throws CertificateExpiredException,
-			CertificateNotYetValidException
-	{
-		// TODO Auto-generated method stub
-	}
-	@Override
-	public void checkValidity(Date arg0) throws CertificateExpiredException,
-			CertificateNotYetValidException 
-    {
-		// TODO Auto-generated method stub
-	}
-	@Override
-	public int getBasicConstraints() 
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	@Override
-	public Principal getIssuerDN() 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public boolean[] getIssuerUniqueID() 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public boolean[] getKeyUsage()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public Date getNotAfter() 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public Date getNotBefore() 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public BigInteger getSerialNumber() 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public String getSigAlgName()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public String getSigAlgOID() 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public byte[] getSigAlgParams() 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public byte[] getSignature() 
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public Principal getSubjectDN()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public boolean[] getSubjectUniqueID() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public byte[] getTBSCertificate() throws CertificateEncodingException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public int getVersion() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	@Override
-	public byte[] getEncoded() throws CertificateEncodingException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public PublicKey getPublicKey() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public void verify(PublicKey arg0) throws CertificateException,
-			NoSuchAlgorithmException, InvalidKeyException,
-			NoSuchProviderException, SignatureException {
-		// TODO Auto-generated method stub
-	}
-	@Override
-	public void verify(PublicKey arg0, String arg1)
-			throws CertificateException, NoSuchAlgorithmException,
-			InvalidKeyException, NoSuchProviderException, SignatureException {
-		// TODO Auto-generated method stub
-	}
-*/
-
 }
