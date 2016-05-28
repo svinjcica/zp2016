@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Label;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,7 +16,9 @@ public class KeyUsageView extends JFrame{
 	 private GenerateKeyWind myGKW;
      private  ArrayList<JCheckBox> chBoxList = new ArrayList<JCheckBox>();
  	 private JButton confirmB,exitB;
-     
+ 	public JComboBox<String> yesNoCritical= new JComboBox<String>();
+ 	 
+ 	 
      public void createChBox(){
     	 chBoxList.add(new JCheckBox("Certificate signing"));
     	 chBoxList.add(new JCheckBox("CRL sign"));
@@ -58,6 +61,8 @@ public class KeyUsageView extends JFrame{
 				}
 				i++;
 			}
+			int selectedCritical = yesNoCritical.getSelectedIndex();
+			if(selectedCritical == 1) myGKW.cert.setKeyUsageCritical(true);
 			myGKW.setEnabled(true);
 			dispose();
 			}
@@ -78,10 +83,21 @@ public class KeyUsageView extends JFrame{
      }
      
      public Panel createPanel(){
-    	 Panel plate = new Panel(new GridLayout(9, 1));
-    	 for(JCheckBox j: chBoxList){
+    	yesNoCritical.addItem("No");
+ 		yesNoCritical.addItem("Yes");
+ 		yesNoCritical.setBackground(Color.ORANGE);
+ 		
+    	Panel plate = new Panel(new GridLayout(9, 2));
+    	int i = 0 ;
+    	Label myL = new Label("Critical :");
+    	myL.setFont(new Font(null,Font.BOLD, 15));
+    	for(JCheckBox j: chBoxList){
     		 plate.add(j,BorderLayout.CENTER);
+    		 if( i == 1) plate.add(myL);
+    		 else if( i == 2)plate.add(yesNoCritical);
+    		 else plate.add(new Label());
     		 j.setFont(new Font(null,Font.BOLD, 15));
+    		 i++;
     	 }
     	 return plate;
      }
