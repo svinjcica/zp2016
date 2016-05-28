@@ -69,7 +69,7 @@ public class FirstWind extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				switch(selectedItem){
-				case 0: secW = new GenerateKeyWind();
+				case 0: secW = new GenerateKeyWind();break;
 				case 1:
 				case 2:
 				case 3:

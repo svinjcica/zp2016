@@ -21,15 +21,17 @@ import javax.swing.JFrame;
 
 
 public class GenerateKeyWind  extends JFrame{
-	public TextField keysize, period, serNum,CN, OU, O, L, ST, C, E, constraints, issuerAlternativeName, keyUsage;
-	private JButton confirmB;
+	public TextField keysize, period, serNum,CN, OU, O, L, ST, C, E;
+	private JButton confirmB, constraintsB,issuerAlternativeNameB, keyUsageB;
+	public ConstraintsView constraintsV;
 	public JComboBox<String> solutionBox = new JComboBox<String>();
 	public JComboBox<String> yesNoConstrains = new JComboBox<String>();
 	public JComboBox<String> yesNoIssuerAlternativeName= new JComboBox<String>();
 	public JComboBox<String> yesNoKeyUsage = new JComboBox<String>();
 	public CertificateClass cert;
 	public KeyPairView secW;
-	Label errorLabel = new Label("BILO STA");
+	public KeyUsageView keyUsageV;
+	Label errorLabel = new Label("");
 	
 	
 	public Panel clientText(int i){
@@ -149,11 +151,27 @@ public class GenerateKeyWind  extends JFrame{
 	}
 	
 	public Panel optionalEx(){
-		Panel plate = new Panel(new GridLayout(3, 4));
+		Panel plate = new Panel(new GridLayout(6, 3));
 		
-		fillYesNo();
+		//fillYesNo();
+		constraintsB = new JButton ("Set basic constraints");
+		constraintsB.setSize(2,2);
+		constraintsB.setBackground(Color.yellow);
+		constraintsB.setFont(new Font(null,Font.BOLD, 15));
+		plate.add(constraintsB);
+		plate.add(new Label());
+		plate.add(new Label());
+		constraintsV = new ConstraintsView(this);
+		constraintsB.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {	
+				setEnabled(false);
+				constraintsV.setVisible(true);
+								
+			}
+		});
 		
-		Label l8 = new Label("Basic constraints :", Label.RIGHT);
+		/*Label l8 = new Label("Basic constraints :", Label.RIGHT);
 		l8.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(l8);
 		constraints = new TextField();
@@ -162,8 +180,25 @@ public class GenerateKeyWind  extends JFrame{
 		l81.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(l81);
 		plate.add(yesNoConstrains);
+		*/ 
 		
-		Label l9 = new Label("Issuer alternative name :", Label.RIGHT);
+		issuerAlternativeNameB = new JButton ("Set issuer alternative name ");
+		issuerAlternativeNameB.setSize(2,2);
+		issuerAlternativeNameB.setBackground(Color.yellow);
+		issuerAlternativeNameB.setFont(new Font(null,Font.BOLD, 15));
+		plate.add(new Label());
+		plate.add(issuerAlternativeNameB);
+		plate.add(new Label());
+		issuerAlternativeNameB.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {	
+				
+				dispose();
+				
+			}
+		});
+		
+		/*Label l9 = new Label("Issuer alternative name :", Label.RIGHT);
 		l9.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(l9);
 		issuerAlternativeName = new TextField();
@@ -172,17 +207,47 @@ public class GenerateKeyWind  extends JFrame{
 		l91.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(l91);
 		plate.add(yesNoIssuerAlternativeName);
+		*/
+	
 		
-		Label l10 = new Label("Key usage :", Label.RIGHT);
+		keyUsageB = new JButton ("Set key usage");
+		keyUsageB.setSize(2,2);
+		//keyUsageB.setBackground(Color.ORANGE);
+		keyUsageB.setBackground(Color.yellow);
+		keyUsageB.setFont(new Font(null,Font.BOLD, 15));
+		plate.add(new Label());
+		plate.add(new Label());
+		plate.add(keyUsageB);
+		keyUsageV = new KeyUsageView(this);
+		keyUsageB.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {	
+				setEnabled(false);
+				keyUsageV.setVisible(true);
+				
+			}
+		});
+		
+		plate.add(new Label());
+		plate.add(new Label());
+		plate.add(new Label());
+		plate.add(new Label());
+		plate.add(new Label());
+		plate.add(new Label());
+		plate.add(new Label());
+		plate.add(new Label());
+		plate.add(new Label());
+		/*Label l10 = new Label("Key usage :", Label.RIGHT);
 		l10.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(l10);
+	
 		keyUsage = new TextField();
 		plate.add(keyUsage);
 		Label l101 = new Label("Critical :", Label.RIGHT);
 		l101.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(l101);
 		plate.add(yesNoKeyUsage);
-		
+		*/
 		return plate;
 	}
 	
@@ -208,7 +273,7 @@ public class GenerateKeyWind  extends JFrame{
 				}
 				else{
 					try{
-						cert = new CertificateClass();
+						
 					
 						cert.setSerialNum(Integer.parseInt(serNum.getText()));
 						cert.setLength(Integer.parseInt(keysize.getText()));
@@ -250,8 +315,9 @@ public class GenerateKeyWind  extends JFrame{
 		errorLabel.setFont(new Font(null,Font.BOLD, 15));
 		add(label1(),BorderLayout.NORTH);
 		add(optionalEx(),BorderLayout.EAST);
-		
+		cert = new CertificateClass();
 		add(plateNextB(),BorderLayout.SOUTH);
+		//setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		// TODO Auto-generated constructor stub
 	}
 }
