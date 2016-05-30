@@ -21,8 +21,29 @@ public class StorageClass
 {
 	private KeyPair pair;
 	private X509Certificate certificate;
+	private static final String name = "MyKeyStorage.p12";
+	private static final String pass = "mystorage";
 	private String keyStoreName;
 	private String keyStorePass;
+	
+	public StorageClass()
+	{
+		this.keyStoreName = name;
+		this.keyStorePass = pass;//ako se ne setuju rucno imaju podrazumevane vrednosti MyStorage
+		
+		KeyStore keyStore = null;
+		try{
+		    keyStore = KeyStore.getInstance("PKCS12");
+		    keyStore.load(null, keyStorePass.toCharArray());
+		     
+		    FileOutputStream fos = new FileOutputStream(this.keyStoreName);
+		    keyStore.store(fos, this.keyStorePass.toCharArray());
+		    fos.close();
+		    
+		} catch (Exception ex){
+		    ex.printStackTrace();
+		}
+	}
 	
 	public StorageClass(String name,String pass)
 	{
@@ -30,47 +51,24 @@ public class StorageClass
 		this.keyStorePass = pass;
 		
 		KeyStore keyStore = null;
-		try {
-			keyStore = KeyStore.getInstance("jks");
-		} catch (KeyStoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}  
-		char[] storePass = keyStorePass.toCharArray();
-		try {
-			keyStore.load(null,null);
-		} catch (NoSuchAlgorithmException | CertificateException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(this.keyStoreName);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			keyStore.store(fos, storePass);
-		} catch (KeyStoreException | NoSuchAlgorithmException
-				| CertificateException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			fos.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		try{
+		    keyStore = KeyStore.getInstance("PKCS12");
+		    keyStore.load(null, keyStorePass.toCharArray());
+		     
+		    FileOutputStream fos = new FileOutputStream(this.keyStoreName);
+		    keyStore.store(fos, this.keyStorePass.toCharArray());
+		    fos.close();
+		    
+		} catch (Exception ex){
+		    ex.printStackTrace();
 		}
 	}
 	
-	public void addToMyKeyStore(String key) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException
+	public void saveKey(String key) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException
 	{
 		String keyPass="pass"; 
 		
-		KeyStore keyStore = KeyStore.getInstance("jks");
+		KeyStore keyStore = KeyStore.getInstance("pkcs12");
 		char[] storePass = this.keyStorePass.toCharArray();
 		FileInputStream is = new FileInputStream(this.keyStoreName);
 		keyStore.load(is,storePass); 
@@ -85,26 +83,70 @@ public class StorageClass
 		fos.close();
 	}
 	
-	public void viewKeysFromKeyStore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, UnrecoverableKeyException
+	public void viewAllKeys() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, UnrecoverableKeyException
 	{
 		Certificate cert=null;
 		String keyPass="pass";
 
-	    KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+	    KeyStore keystore = KeyStore.getInstance("pkcs12");
 	    keystore.load(new FileInputStream(this.keyStoreName), this.keyStorePass.toCharArray());
-	    //is.close();
 
+	    int i=0;
 	    Enumeration aliases = keystore.aliases();
-	    while(aliases.hasMoreElements()) {
+	    while(aliases.hasMoreElements()) 
+	    {
 	      String alias = (String)aliases.nextElement();
           Key key = keystore.getKey(alias, keyPass.toCharArray());
 	    if (key instanceof PrivateKey) 
 	      cert = keystore.getCertificate(alias);
+	     System.out.println("=============================================");
+	    System.out.println(alias);
 	     System.out.println(cert.toString());
-	    }
-	   
-		
+	  }
+	    	   
 	}
+	
+	  public String getKeyStorePass() {
+		return keyStorePass;
+	}
+
+	public void setKeyStorePass(String keyStorePass) {
+		this.keyStorePass = keyStorePass;
+	}
+
+	public void importKeys(String storeName,String pass) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, UnrecoverableKeyException
+	{
+		Certificate cert=null;
+		String keyPass="pass";
+
+	    KeyStore keystore = KeyStore.getInstance("pkcs12");
+	    keystore.load(new FileInputStream(storeName), pass.toCharArray());
+	    
+	    int i=0;
+	    Enumeration aliases = keystore.aliases();
+	    while(aliases.hasMoreElements()) 
+	    {
+	      String alias = (String)aliases.nextElement();
+          Key key = keystore.getKey(alias, keyPass.toCharArray());
+          
+  		  KeyStore myKeyStore = KeyStore.getInstance("pkcs12");
+   		  myKeyStore.load(new FileInputStream(this.keyStoreName), this.keyStorePass.toCharArray());
+  		
+  		  Certificate[] certChain = new Certificate[1];  
+  		  certChain[0] = keystore.getCertificate(alias);  
+  		  myKeyStore.setKeyEntry(alias, key, keyPass.toCharArray(), certChain); 
+  		
+  		  FileOutputStream fos = new FileOutputStream(this.keyStoreName);
+  		  myKeyStore.store(fos, this.keyStorePass.toCharArray());
+  		  fos.close();
+          
+          
+ 
+	    }
+	    
+	    
+	}
+
     
 	
 	

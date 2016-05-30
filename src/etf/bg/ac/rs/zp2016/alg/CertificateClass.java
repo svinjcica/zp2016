@@ -146,7 +146,7 @@ public class CertificateClass
 	}
 
 
-	X509Certificate generateCertificate() throws GeneralSecurityException, IOException
+	public X509Certificate generateCertificate() throws GeneralSecurityException, IOException
     {
     	
     	KeyPairClass gen = new KeyPairClass();
@@ -187,22 +187,22 @@ public class CertificateClass
 		  if(this.isKeyExt())
 		  {
 		   KeyUsageExtension kue = new KeyUsageExtension(keyUsagePolicies);
-		   ext.set(KeyUsageExtension.NAME, new KeyUsageExtension(this.isKeyUsageCritical(),kue.getValue()));
+		   ext.set(KeyUsageExtension.NAME, new KeyUsageExtension(this.isKeyUsageCritical(),kue.getExtensionValue()));
 		  }
 		  
 		  //setting Alternative names extension-glup nacin ali trenutno ne znam drugacije :(
-		  if(this.isAltNameExt())
+		 /* if(this.isAltNameExt())
 		  {
 		   SubjectAlternativeNameExtension san = new SubjectAlternativeNameExtension();
 		   byte[] altNamesValue = new DerValue(DerValue.tag_OctetString, altNames.getBytes()).toByteArray();
 		   ext.set(SubjectAlternativeNameExtension.NAME, new Extension(san.getExtensionId(),altNamesCritical,altNamesValue));
-		  }
+		  }*/
 		  
 		 // setting Basic contraints extension
 		 if(this.isBasicExt())
 		  {
 		  BasicConstraintsExtension be = new BasicConstraintsExtension(CA,pathLength);
-		  ext.set(BasicConstraintsExtension.NAME,  new BasicConstraintsExtension(this.isBasicCritical(),be.getValue()));
+		  ext.set(BasicConstraintsExtension.NAME,  new BasicConstraintsExtension(this.isBasicCritical(),be.getExtensionValue()));
 		  }
 		
 		  info.set(X509CertInfo.EXTENSIONS, ext);
