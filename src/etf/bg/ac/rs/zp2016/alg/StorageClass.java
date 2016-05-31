@@ -6,19 +6,27 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Enumeration;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import sun.misc.BASE64Encoder;
 
@@ -193,12 +201,30 @@ public class StorageClass
             
 	}
 	
+	public ArrayList<String> viewKeyAlies(String storeName,String storePass) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException
+	{
+		 ArrayList<String> keys = new ArrayList<String>();
+		 KeyStore keystore = KeyStore.getInstance("pkcs12");
+		 keystore.load(new FileInputStream(storeName), pass.toCharArray());
+		    
+		    int i=0;
+		    Enumeration aliases = keystore.aliases();
+		    while(aliases.hasMoreElements()) 
+		    {
+		      String alias = (String)aliases.nextElement();
+	          keys.add(alias);
+	          
+		    }
+	  	return keys;	
+	}
 	
-	public void exportKey(String storeName,String storePass,String keyAlias) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, UnrecoverableKeyException
+	
+	public void exportKey(String storeName,String storePass,String keyAlias) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, UnrecoverableKeyException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
 	{
 		
 		Certificate cert=null;
 		String keyPass="pass";
+		Cipher c = Cipher.getInstance("AES");
       
 		//pravimo novi p12 fajl za export
 	    KeyStore keystore = KeyStore.getInstance("pkcs12");
@@ -209,8 +235,18 @@ public class StorageClass
 	    mykeystore.load(new FileInputStream(this.name), this.pass.toCharArray());
 	    Key key =  mykeystore.getKey(keyAlias, "pass".toCharArray());
 	    
+	    
   		  Certificate[] certChain = new Certificate[1];  
-  		  certChain[0] = mykeystore.getCertificate(keyAlias);  
+  		  certChain[0] = mykeystore.getCertificate(keyAlias); 
+  		  PublicKey pkey = mykeystore.getCertificate(keyAlias).getPublicKey();
+  		  c.init(Cipher.ENCRYPT_MODE, pkey);
+  		  
+  		  cert = mykeystore.getCertificate(keyAlias); ;
+  		  byte[] contentC = cert.toString().getBytes();
+  		  contentC = c.doFinal(contentC);
+  		  //Certificate cipheredC = Certificate
+  		  
+  		  
   		  keystore.setKeyEntry(keyAlias, key, keyPass.toCharArray(), certChain); 
   		
   		  FileOutputStream fos = new FileOutputStream(storeName + ".p12");
