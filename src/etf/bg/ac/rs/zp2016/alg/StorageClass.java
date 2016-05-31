@@ -67,7 +67,7 @@ public class StorageClass
 		KeyStore keyStore = null;
 		try{
 		    keyStore = KeyStore.getInstance("PKCS12");
-		    keyStore.load(new FileInputStream(name), keyStorePass.toCharArray());
+		    keyStore.load(new FileInputStream(name), pass.toCharArray());
 		     
 		    FileOutputStream fos = new FileOutputStream(this.keyStoreName);
 		    keyStore.store(fos, this.keyStorePass.toCharArray());
@@ -284,8 +284,30 @@ public class StorageClass
 	
 	
 	
-	public void exportCertificate(String path,X509Certificate cert) throws IOException, CertificateException
+	public void exportCertificate(String path,String alias) throws IOException, CertificateException
 	{
+	
+		KeyStore keystore = null;
+		try {
+			keystore = KeyStore.getInstance("pkcs12");
+		} catch (KeyStoreException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			keystore.load(new FileInputStream(this.name), this.pass.toCharArray());
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Certificate cert = null;
+		try {
+			cert = keystore.getCertificate(alias);
+		} catch (KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		FileOutputStream fos = new FileOutputStream(path+".cer");
 		String b64 = new BASE64Encoder().encode(cert.getEncoded());
 		fos.write("-----BEGIN CERTIFICATE-----\n".getBytes());
