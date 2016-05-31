@@ -213,7 +213,7 @@ public class StorageClass
 			e.printStackTrace();
 		}
 		 try {
-			keystore.load(new FileInputStream(storeName), pass.toCharArray());
+			keystore.load(new FileInputStream(storeName), storePass.toCharArray());
 		} catch (NoSuchAlgorithmException | CertificateException
 				| IOException e) {
 			// TODO Auto-generated catch block
@@ -244,7 +244,7 @@ public class StorageClass
 		
 		Certificate cert=null;
 		String keyPass="pass";
-		Cipher c = Cipher.getInstance("AES");
+		//Cipher c = Cipher.getInstance("AES");
       
 		//pravimo novi p12 fajl za export
 	    KeyStore keystore = KeyStore.getInstance("pkcs12");
@@ -258,14 +258,15 @@ public class StorageClass
 	    
   		  Certificate[] certChain = new Certificate[1];  
   		  cert = mykeystore.getCertificate(keyAlias); 
-  		  PublicKey pkey = mykeystore.getCertificate(keyAlias).getPublicKey();
-  		  c.init(Cipher.ENCRYPT_MODE, pkey);
+  		  //PublicKey pkey = mykeystore.getCertificate(keyAlias).getPublicKey();
+  		 // c.init(Cipher.ENCRYPT_MODE, pkey);
   		  
-  		  cert = mykeystore.getCertificate(keyAlias); ;
-  		  byte[] contentC = cert.toString().getBytes();
-  		  contentC = c.doFinal(contentC);
-  		  Certificate cipheredC = CertificateFactory.getInstance("X509").generateCertificate(new ByteArrayInputStream(contentC));
-  		 certChain[0] = cipheredC;
+  		  //cert = mykeystore.getCertificate(keyAlias); ;
+  		 // byte[] contentC = cert.toString().getBytes();
+  		  //contentC = c.doFinal(contentC);
+  		 // Certificate cipheredC = CertificateFactory.getInstance("X509").generateCertificate(new ByteArrayInputStream(contentC));
+  		 //certChain[0] = cipheredC;
+  		  certChain[0] = cert;
   		  
   		  keystore.setKeyEntry(keyAlias, key, keyPass.toCharArray(), certChain); 
   		
