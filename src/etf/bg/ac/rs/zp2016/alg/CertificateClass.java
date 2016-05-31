@@ -1,4 +1,4 @@
-package zp2016;
+package etf.bg.ac.rs.zp2016.alg;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

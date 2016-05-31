@@ -83,11 +83,11 @@ public class KeyPairClass
 		//if(random!= null)
 			this.keyGen.initialize(1024,random);
 		// else  */
-<<<<<<< HEAD
+
 			keyGen.initialize(length);
-=======
-		 keyGen.initialize(length);
->>>>>>> 73faf22e048b18f84a0d963e4f4ff022160b3d6a
+
+		// keyGen.initialize(length);
+
 		
 		//generating keyPair
 		this.pair = this.keyGen.generateKeyPair();
