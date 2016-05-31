@@ -120,10 +120,11 @@ public class StorageClass
 	    	   
 	}
 	
-	public void viewAllKeys(String storageName,String pass) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, UnrecoverableKeyException
+	public String viewAllKeys(String storageName,String pass) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, UnrecoverableKeyException
 	{
 		Certificate cert=null;
 		String keyPass="pass";
+		String ispis = "Pregled postojecih sertifikata:\n";
 
 	    KeyStore keystore = KeyStore.getInstance("pkcs12");
 	    keystore.load(new FileInputStream(storageName), pass.toCharArray());
@@ -136,10 +137,15 @@ public class StorageClass
           Key key = keystore.getKey(alias, keyPass.toCharArray());
 	    if (key instanceof PrivateKey) 
 	      cert = keystore.getCertificate(alias);
-	     System.out.println("=============================================");
-	    System.out.println(alias);
-	     System.out.println(cert.toString());
+	     //System.out.println("=============================================");
+	    ispis=ispis+"=============================================\n";
+	    ispis=ispis+alias+"\n";
+	    //System.out.println(alias);
+	    // System.out.println(cert.toString());
+	    ispis=ispis+cert.toString()+"\n";
 	  }
+	    
+	   return ispis;
 	    	   
 	}
 	
