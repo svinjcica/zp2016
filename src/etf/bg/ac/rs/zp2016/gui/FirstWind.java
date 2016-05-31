@@ -73,9 +73,9 @@ public class FirstWind extends JFrame{
 				case 0: secW = new GenerateKeyWind(); break;
 				case 1: secW = new ImportView(); break;
 				case 2: secW = new ExportView();break;
-				case 3:
+				case 3:	secW = new ShowAllKeys(); break;
 				case 4:
-				case 5:
+				case 5: secW = new CertificateExport();break;
 				
 				}
 				
