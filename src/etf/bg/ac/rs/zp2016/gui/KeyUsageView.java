@@ -16,7 +16,7 @@ public class KeyUsageView extends JFrame{
 	 private GenerateKeyWind myGKW;
      private  ArrayList<JCheckBox> chBoxList = new ArrayList<JCheckBox>();
  	 private JButton confirmB,exitB;
- 	public JComboBox<String> yesNoCritical= new JComboBox<String>();
+ 	 public JComboBox<String> yesNoCritical= new JComboBox<String>();
  	 
  	 
      public void createChBox(){
@@ -103,7 +103,7 @@ public class KeyUsageView extends JFrame{
      }
      
      public KeyUsageView(GenerateKeyWind myGKW) {
-    	super("Constraints extension");
+    	super("Key usage");
  		setBounds(300,150,500,250);
  		setResizable(false);
  		createChBox();

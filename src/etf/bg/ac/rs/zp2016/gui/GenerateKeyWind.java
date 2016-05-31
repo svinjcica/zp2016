@@ -31,6 +31,7 @@ public class GenerateKeyWind  extends JFrame{
 	public CertificateClass cert;
 	public KeyPairView secW;
 	public KeyUsageView keyUsageV;
+	public AlternativeNameView altNameV;
 	Label errorLabel = new Label("");
 	
 	
@@ -151,9 +152,8 @@ public class GenerateKeyWind  extends JFrame{
 	}
 	
 	public Panel optionalEx(){
-		Panel plate = new Panel(new GridLayout(6, 3));
+		Panel plate = new Panel(new GridLayout(4, 3));
 		
-		//fillYesNo();
 		constraintsB = new JButton ("Set basic constraints");
 		constraintsB.setSize(2,2);
 		constraintsB.setBackground(Color.yellow);
@@ -170,17 +170,7 @@ public class GenerateKeyWind  extends JFrame{
 								
 			}
 		});
-		
-		/*Label l8 = new Label("Basic constraints :", Label.RIGHT);
-		l8.setFont(new Font(null,Font.BOLD, 15));
-		plate.add(l8);
-		constraints = new TextField();
-		plate.add(constraints);
-		Label l81 = new Label("Critical :", Label.RIGHT);
-		l81.setFont(new Font(null,Font.BOLD, 15));
-		plate.add(l81);
-		plate.add(yesNoConstrains);
-		*/ 
+	
 		
 		issuerAlternativeNameB = new JButton ("Set issuer alternative name ");
 		issuerAlternativeNameB.setSize(2,2);
@@ -189,30 +179,20 @@ public class GenerateKeyWind  extends JFrame{
 		plate.add(new Label());
 		plate.add(issuerAlternativeNameB);
 		plate.add(new Label());
+		altNameV = new AlternativeNameView(this);
 		issuerAlternativeNameB.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {	
+				setEnabled(false);
 				
-				dispose();
-				
+				altNameV.setVisible(true);
 			}
 		});
 		
-		/*Label l9 = new Label("Issuer alternative name :", Label.RIGHT);
-		l9.setFont(new Font(null,Font.BOLD, 15));
-		plate.add(l9);
-		issuerAlternativeName = new TextField();
-		plate.add(issuerAlternativeName);
-		Label l91 = new Label("Critical :", Label.RIGHT);
-		l91.setFont(new Font(null,Font.BOLD, 15));
-		plate.add(l91);
-		plate.add(yesNoIssuerAlternativeName);
-		*/
 	
 		
 		keyUsageB = new JButton ("Set key usage");
 		keyUsageB.setSize(2,2);
-		//keyUsageB.setBackground(Color.ORANGE);
 		keyUsageB.setBackground(Color.yellow);
 		keyUsageB.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(new Label());
@@ -231,23 +211,8 @@ public class GenerateKeyWind  extends JFrame{
 		plate.add(new Label());
 		plate.add(new Label());
 		plate.add(new Label());
-		plate.add(new Label());
-		plate.add(new Label());
-		plate.add(new Label());
-		plate.add(new Label());
-		plate.add(new Label());
-		plate.add(new Label());
-		/*Label l10 = new Label("Key usage :", Label.RIGHT);
-		l10.setFont(new Font(null,Font.BOLD, 15));
-		plate.add(l10);
-	
-		keyUsage = new TextField();
-		plate.add(keyUsage);
-		Label l101 = new Label("Critical :", Label.RIGHT);
-		l101.setFont(new Font(null,Font.BOLD, 15));
-		plate.add(l101);
-		plate.add(yesNoKeyUsage);
-		*/
+		
+		
 		return plate;
 	}
 	

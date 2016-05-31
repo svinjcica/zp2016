@@ -24,11 +24,15 @@ import javax.swing.plaf.metal.MetalBorders.TextFieldBorder;
 
 public class KeyPairView extends JFrame{
 	private TextArea txt ;
-	public static ArrayList<CertificateElemList> allCert = new ArrayList<CertificateElemList>();
+	//public static ArrayList<CertificateElemList> allCert = new ArrayList<CertificateElemList>();
 	public boolean ex = true;
 	private JButton next;
 	private TextField textF;
 	private CertificateClass cert;
+	private StorageClass sc;
+	private Label errorLabel = new Label("");
+	protected X509Certificate cX509;
+	private FirstWind fw;
 	
 	private Panel plateTxtArea(){
 		Panel plate = new Panel();
@@ -52,17 +56,38 @@ public class KeyPairView extends JFrame{
 		textF = new TextField();
 		plate.add(textF);
 		
-		plate.add(new Label());
+		plate.add(errorLabel, BorderLayout.NORTH);
 		plate.add(next);
 		
 		
 		next.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(textF.getText().length()!=0)
-				allCert.add(new CertificateElemList(textF.getText(), cert));
-				
+				if(textF.getText().length()!=0){
+			//	allCert.add(new CertificateElemList(textF.getText(), cert));
+				 sc = new StorageClass();
+				  sc.setCertificate(cX509);
+				  sc.setPair(cert.getPair());
+				   try {
+				    sc.saveKey(textF.getText());
+				    fw = new FirstWind();
+					fw.setVisible(true);
+					fw.ex = true;
+					dispose();
+					
+			}catch(Exception ex){
+				errorLabel.setText(ex.toString());
+				errorLabel.setFont(new Font(null,Font.BOLD, 10));
+				errorLabel.setBackground(Color.RED);
 			}
+		
+			}
+			else{
+				errorLabel.setText("You must input name!!");
+				errorLabel.setFont(new Font(null,Font.BOLD, 10));
+				errorLabel.setBackground(Color.RED);
+				}
+				}
 		});
 		return plate;
 	}
@@ -74,11 +99,13 @@ public class KeyPairView extends JFrame{
 		this.cert = cert;
 		setBounds(300,150,700,400);
 		setResizable(false);
-		
+		errorLabel = new Label(" ", Label.LEFT);
+		errorLabel.setBackground(Color.ORANGE);
+		errorLabel.setFont(new Font(null,Font.BOLD, 15));
 		txt =  new TextArea();
 		add(txt);
 		add(plateSaveB(),BorderLayout.SOUTH );
-		X509Certificate cX509 = null;
+		
 		
 		try {
 			cX509 = cert.generateCertificate();

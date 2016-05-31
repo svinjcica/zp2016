@@ -63,15 +63,16 @@ public class FirstWind extends JFrame{
 		next.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(new Label());
 		plate.add(next);
-		selectedItem = solutionBox.getSelectedIndex(); 
 		
 		next.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				selectedItem = solutionBox.getSelectedIndex(); 
+				System.out.println(solutionBox.getSelectedIndex());
 				switch(selectedItem){
-				case 0: secW = new GenerateKeyWind();break;
-				case 1:
-				case 2:
+				case 0: secW = new GenerateKeyWind(); break;
+				case 1: secW = new ImportView(); break;
+				case 2: secW = new ExportView();break;
 				case 3:
 				case 4:
 				case 5:
