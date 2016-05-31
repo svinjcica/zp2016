@@ -67,7 +67,7 @@ public class StorageClass
 		KeyStore keyStore = null;
 		try{
 		    keyStore = KeyStore.getInstance("PKCS12");
-		    keyStore.load(null, keyStorePass.toCharArray());
+		    keyStore.load(new FileInputStream(name), keyStorePass.toCharArray());
 		     
 		    FileOutputStream fos = new FileOutputStream(this.keyStoreName);
 		    keyStore.store(fos, this.keyStorePass.toCharArray());
