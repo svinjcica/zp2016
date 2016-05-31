@@ -1,6 +1,7 @@
 package etf.bg.ac.rs.zp2016.alg;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -201,21 +202,40 @@ public class StorageClass
             
 	}
 	
-	public ArrayList<String> viewKeyAlies(String storeName,String storePass) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException
+	public ArrayList<String> viewKeyAlies(String storeName,String storePass)
 	{
 		 ArrayList<String> keys = new ArrayList<String>();
-		 KeyStore keystore = KeyStore.getInstance("pkcs12");
-		 keystore.load(new FileInputStream(storeName), pass.toCharArray());
+		 KeyStore keystore = null;
+		try {
+			keystore = KeyStore.getInstance("pkcs12");
+		} catch (KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		 try {
+			keystore.load(new FileInputStream(storeName), pass.toCharArray());
+		} catch (NoSuchAlgorithmException | CertificateException
+				| IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		    
 		    int i=0;
-		    Enumeration aliases = keystore.aliases();
+		    Enumeration aliases = null;
+			try {
+				aliases = keystore.aliases();
+			} catch (KeyStoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		    while(aliases.hasMoreElements()) 
 		    {
 		      String alias = (String)aliases.nextElement();
 	          keys.add(alias);
 	          
 		    }
-	  	return keys;	
+	  	if(!keys.isEmpty()) return keys;
+	  	else return null;
 	}
 	
 	
@@ -237,15 +257,15 @@ public class StorageClass
 	    
 	    
   		  Certificate[] certChain = new Certificate[1];  
-  		  certChain[0] = mykeystore.getCertificate(keyAlias); 
+  		  cert = mykeystore.getCertificate(keyAlias); 
   		  PublicKey pkey = mykeystore.getCertificate(keyAlias).getPublicKey();
   		  c.init(Cipher.ENCRYPT_MODE, pkey);
   		  
   		  cert = mykeystore.getCertificate(keyAlias); ;
   		  byte[] contentC = cert.toString().getBytes();
   		  contentC = c.doFinal(contentC);
-  		  //Certificate cipheredC = Certificate
-  		  
+  		  Certificate cipheredC = CertificateFactory.getInstance("X509").generateCertificate(new ByteArrayInputStream(contentC));
+  		 certChain[0] = cipheredC;
   		  
   		  keystore.setKeyEntry(keyAlias, key, keyPass.toCharArray(), certChain); 
   		
