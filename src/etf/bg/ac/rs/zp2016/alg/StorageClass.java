@@ -356,6 +356,43 @@ public class StorageClass
 	}
 	
 	
+	public void exportKey(String storeName,String storePass,String keyAlias) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, UnrecoverableKeyException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
+	{
+		
+		Certificate cert=null;
+		String keyPass="pass";
+		//Cipher c = Cipher.getInstance("AES");
+      
+		//pravimo novi p12 fajl za export
+	    KeyStore keystore = KeyStore.getInstance("pkcs12");
+	    keystore.load(null, null);
+	    
+	    //ucitamo stari KeyStore i iz njega uzmemo zeljeni kljuc
+	    KeyStore mykeystore = KeyStore.getInstance("pkcs12");
+	    mykeystore.load(new FileInputStream(this.name), this.pass.toCharArray());
+	    Key key =  mykeystore.getKey(keyAlias, "pass".toCharArray());
+	    
+	    
+  		  Certificate[] certChain = new Certificate[1];  
+  		  cert = mykeystore.getCertificate(keyAlias); 
+  		  //PublicKey pkey = mykeystore.getCertificate(keyAlias).getPublicKey();
+  		 // c.init(Cipher.ENCRYPT_MODE, pkey);
+  		  
+  		  //cert = mykeystore.getCertificate(keyAlias); ;
+  		 // byte[] contentC = cert.toString().getBytes();
+  		  //contentC = c.doFinal(contentC);
+  		 // Certificate cipheredC = CertificateFactory.getInstance("X509").generateCertificate(new ByteArrayInputStream(contentC));
+  		 //certChain[0] = cipheredC;
+  		  certChain[0] = cert;
+  		  
+  		  keystore.setKeyEntry(keyAlias, key, keyPass.toCharArray(), certChain); 
+  		
+  		  FileOutputStream fos = new FileOutputStream(storeName + ".p12");
+  		  keystore.store(fos, storePass.toCharArray());
+  		  fos.close();
+        }    
+	
+	
 	
 	public void exportCertificate(String path,String alias) throws IOException, CertificateException
 	{
