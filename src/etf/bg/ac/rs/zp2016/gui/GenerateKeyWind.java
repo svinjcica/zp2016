@@ -3,7 +3,7 @@ package etf.bg.ac.rs.zp2016.gui;
 import etf.bg.ac.rs.zp2016.alg.*;
 import java.security.InvalidParameterException;
 
-
+import javax.swing.JOptionPane;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -33,6 +33,7 @@ public class GenerateKeyWind  extends JFrame{
 	public KeyUsageView keyUsageV;
 	public AlternativeNameView altNameV;
 	Label errorLabel = new Label("");
+	private FirstWind fw;
 	
 	
 	public Panel clientText(int i){
@@ -56,7 +57,7 @@ public class GenerateKeyWind  extends JFrame{
 		solutionBox.setBackground(Color.ORANGE);
 		solutionBox.addItem("v3");
 		solutionBox.setEditable(false);
-		Panel plate = new Panel(new GridLayout(17, 2));
+		Panel plate = new Panel(new GridLayout(16, 2));
 		
 		plate.add(clientText(3));
 		plate.add(clientText(0));
@@ -156,7 +157,7 @@ public class GenerateKeyWind  extends JFrame{
 		
 		constraintsB = new JButton ("Set basic constraints");
 		constraintsB.setSize(2,2);
-		constraintsB.setBackground(Color.yellow);
+		constraintsB.setBackground(Color.orange);
 		constraintsB.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(constraintsB);
 		plate.add(new Label());
@@ -174,7 +175,7 @@ public class GenerateKeyWind  extends JFrame{
 		
 		issuerAlternativeNameB = new JButton ("Set issuer alternative name ");
 		issuerAlternativeNameB.setSize(2,2);
-		issuerAlternativeNameB.setBackground(Color.yellow);
+		issuerAlternativeNameB.setBackground(Color.orange);
 		issuerAlternativeNameB.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(new Label());
 		plate.add(issuerAlternativeNameB);
@@ -193,7 +194,7 @@ public class GenerateKeyWind  extends JFrame{
 		
 		keyUsageB = new JButton ("Set key usage");
 		keyUsageB.setSize(2,2);
-		keyUsageB.setBackground(Color.yellow);
+		keyUsageB.setBackground(Color.orange);
 		keyUsageB.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(new Label());
 		plate.add(new Label());
@@ -208,9 +209,6 @@ public class GenerateKeyWind  extends JFrame{
 			}
 		});
 		
-		plate.add(new Label());
-		plate.add(new Label());
-		plate.add(new Label());
 		
 		
 		return plate;
@@ -230,7 +228,7 @@ public class GenerateKeyWind  extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
-				if(keysize.getText().length()==0|| period.getText().length()==0 || serNum.getText().length()==0 || CN.getText().length()==0 || OU.getText().length()==0 || O.getText().length()==0|| L.getText().length()==0 || ST.getText().length()==0 || C.getText().length()==0|| E.getText().length()==0){
+				if(keysize.getText().length()==0 || period.getText().length()==0 || serNum.getText().length()==0 || CN.getText().length()==0 || OU.getText().length()==0 || O.getText().length()==0|| L.getText().length()==0 || ST.getText().length()==0 || C.getText().length()==0|| E.getText().length()==0){
 						
 					errorLabel.setText("You didn't input all value!!");
 					errorLabel.setBackground(Color.RED);
@@ -258,10 +256,10 @@ public class GenerateKeyWind  extends JFrame{
 						errorLabel.setText("Serial number, Key size and Period must be integer!!");
 						errorLabel.setFont(new Font(null,Font.BOLD, 10));
 						errorLabel.setBackground(Color.RED);
-				}catch (InvalidParameterException e2) {
-					errorLabel.setText("RSA keys must be >= 512 bits long <= 16384");
-					errorLabel.setFont(new Font(null,Font.BOLD, 10));
-					errorLabel.setBackground(Color.RED);
+					}catch (InvalidParameterException e2) {
+						errorLabel.setText("RSA keys must be >= 512 bits long <= 16384");
+						errorLabel.setFont(new Font(null,Font.BOLD, 10));
+						errorLabel.setBackground(Color.RED);
 				}
 				}
 			}
@@ -270,7 +268,7 @@ public class GenerateKeyWind  extends JFrame{
 		return plate;
 	}
 
-
+	
 	public GenerateKeyWind() {
 		super("X.509 Authentication Service: GENERATE NEW KEY PAIR");
 		setBounds(300,150,700,580);
@@ -282,7 +280,17 @@ public class GenerateKeyWind  extends JFrame{
 		add(optionalEx(),BorderLayout.EAST);
 		cert = new CertificateClass();
 		add(plateNextB(),BorderLayout.SOUTH);
-		//setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		// TODO Auto-generated constructor stub
+		
+		addWindowListener(new java.awt.event.WindowAdapter() {
+		    @Override
+		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+		    	fw = new FirstWind();
+				 fw.setVisible(true);
+				 fw.ex = true;
+				 dispose();
+		      
+		    }
+		});
+		
 	}
 }

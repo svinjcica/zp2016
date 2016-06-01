@@ -35,11 +35,12 @@ public class ImportView extends JFrame{
 	private TextField txt, pass, name;
 	private JButton importB, exitB, confirmPass;
 	private FirstWind fw;
+	private ArrayList<String> allSolutions;
 	public JComboBox<String> solutionBox = new JComboBox<String>();
 	
 	
 	public void fillAllSolutions(String storeName,String storePass){
-		ArrayList<String> allSolutions = new ArrayList<String>();
+		allSolutions = new ArrayList<String>();
 		System.out.println(storeName+"  "+storePass);
 		  sc = new StorageClass(txt.getText(),pass.getText());
 		allSolutions = sc.viewKeyAlies(storeName,storePass); 
@@ -103,6 +104,10 @@ public class ImportView extends JFrame{
 					errorLabel.setText("You must input password!!");
 					errorLabel.setBackground(Color.RED);
 				}
+				else if(name.getText().length() == 0){
+					errorLabel.setText("You must input new name!!");
+					errorLabel.setBackground(Color.RED);
+				}
 				else{
 					String extStr = getFileExtension(txt.getText());
 					if( extStr == null){
@@ -115,20 +120,20 @@ public class ImportView extends JFrame{
 							errorLabel.setBackground(Color.RED);	
 						}
 						else {
-							//import kljuceva
-							 //prvo napravimo novi fajl za import
 							
 							  try {
-								sc.importKeys(sc.getKeyStoreName(),sc.getKeyStorePass());
+								int selectedItem = solutionBox.getSelectedIndex();
+								String keyAlias = allSolutions.get(selectedItem);
+								sc.importKey(sc.getKeyStoreName(),sc.getKeyStorePass(),keyAlias,name.getText());
 								fw = new FirstWind();
 								fw.setVisible(true);
 								fw.ex = true;
 								dispose();
 							} catch ( KeyStoreException| NoSuchAlgorithmException | CertificateException ex) {
-								// TODO Auto-generated catch block
+							
 								ex.printStackTrace();
 							} catch (UnrecoverableKeyException | IOException  e1) {
-								// TODO Auto-generated catch block
+								
 								errorLabel.setText("Wrong password! ");
 								errorLabel.setBackground(Color.RED);
 							}
@@ -136,7 +141,7 @@ public class ImportView extends JFrame{
 						}
 					}
 				}
-				// fje za eksport
+				
 			}
 		});
 		
@@ -206,7 +211,6 @@ public class ImportView extends JFrame{
 			public void actionPerformed(ActionEvent e) {	
 				//setEnabled(false);
 				System.out.println(txt.getText()+"  "+pass.getText());
-			//	fillAllSolutions(txt.getText(), pass.getText());
 				fillAllSolutions(txt.getText(), "pass");
 				// fje za eksport
 			}

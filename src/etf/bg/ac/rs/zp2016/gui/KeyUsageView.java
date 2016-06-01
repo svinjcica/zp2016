@@ -22,7 +22,7 @@ public class KeyUsageView extends JFrame{
      public void createChBox(){
     	 chBoxList.add(new JCheckBox("Certificate signing"));
     	 chBoxList.add(new JCheckBox("CRL sign"));
-    	 chBoxList.add(new JCheckBox("Data  encipherment"));
+    	 chBoxList.add(new JCheckBox("Data encipherment"));
     	 chBoxList.add(new JCheckBox("Decipher only"));
     	 chBoxList.add(new JCheckBox("Digital signature"));
     	 chBoxList.add(new JCheckBox("Encipher only"));

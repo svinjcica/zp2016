@@ -9,6 +9,7 @@ import java.awt.Panel;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -18,19 +19,28 @@ public class AlternativeNameView extends JFrame{
 	 private JButton confirmB,exitB;
 	 private GenerateKeyWind myGKW;
 	 private TextField myTextFiled;
+	 public JComboBox<String> yesNoCritical= new JComboBox<String>();
+	 private Label errorLabel = new Label("");
+	 private ButtonGroup group;
 	 
 	 private Panel initRadioB(){ 
-		 radioBList.add(new JRadioButton("Directory Name", true));
 		 radioBList.add(new JRadioButton("DNS Name"));
 		 radioBList.add(new JRadioButton("IP Address"));
-		 radioBList.add(new JRadioButton("Registeres ID"));
 		 radioBList.add(new JRadioButton("RFC 822 Name"));
 		 radioBList.add(new JRadioButton("URI"));
-		 radioBList.add(new JRadioButton("UPN"));
-		 ButtonGroup group = new ButtonGroup();
+		 radioBList.add(new JRadioButton("OID"));
+		 Label crLabel = new Label("Critical :");
+		 crLabel.setFont(new Font(null,Font.BOLD, 15));
+		 yesNoCritical.addItem("No");
+	 	 yesNoCritical.addItem("Yes");
+	 	 yesNoCritical.setBackground(Color.ORANGE);
+		 group = new ButtonGroup();
 		 for(JRadioButton jb: radioBList)
-	     group.add(jb);
-		 Panel plate = new Panel(new GridLayout(6, 2));
+			 group.add(jb);
+		 
+		 Panel plate = new Panel(new GridLayout(7, 2));
+		 plate.add(crLabel);
+		 plate.add(yesNoCritical);
 		 Label l1 = new Label("Choose: ");
 		 l1.setFont(new Font(null,Font.BOLD, 15));
 		 plate.add(l1);
@@ -40,9 +50,11 @@ public class AlternativeNameView extends JFrame{
 		 plate.add(new Label());
 		 Label l2 = new Label("Type name value: ",Label.RIGHT);
 		 l2.setFont(new Font(null,Font.BOLD, 15));
-		 plate.add(l2 );
+		 plate.add(l2);
 		 myTextFiled = new TextField();
 		 plate.add(myTextFiled);
+		 plate.add(errorLabel);
+		 plate.add(new Label());
 		 return plate;
 		 
 	 }
@@ -67,8 +79,34 @@ public class AlternativeNameView extends JFrame{
 				
 				@Override
 				public void actionPerformed(ActionEvent e) {
-				
-				dispose();
+					if( myTextFiled.getText().length() == 0){
+						errorLabel.setText("You must input name!! ");
+						errorLabel.setBackground(Color.RED);
+					}
+					else{
+						try {
+							int selectedCritical = yesNoCritical.getSelectedIndex();
+							if(selectedCritical == 1) myGKW.cert.setAltNamesCritical(true);
+							int selectedValue = 0;
+							myGKW.cert.setAltNameExt(true);
+							for(JRadioButton r: radioBList){
+								if(r.isSelected()) break;
+								selectedValue++;
+							}
+							System.out.println(""+selectedValue+myTextFiled.getText());
+							myGKW.cert.subjectAltNames(selectedValue, myTextFiled.getText());
+							myGKW.setEnabled(true);
+							errorLabel.setText("");
+							errorLabel.setBackground(Color.GRAY);
+							dispose();
+						
+						}catch (IOException e1) {
+							// TODO Auto-generated catch block
+							errorLabel.setText("Wrong input format!!");
+							errorLabel.setBackground(Color.RED);
+						}
+					
+					}
 				}
 			});
 			
@@ -94,6 +132,9 @@ public class AlternativeNameView extends JFrame{
 	 		add(initRadioB(),BorderLayout.CENTER);
 	 		add(createPanelB(),BorderLayout.SOUTH);
 	 		this.myGKW = myGKW;
+	 	//	errorLabel = new Label(" ", Label.LEFT);
+		//	errorLabel.setBackground(Color.ORANGE);
+			errorLabel.setFont(new Font(null,Font.BOLD, 15));
 	 }
 	
 }

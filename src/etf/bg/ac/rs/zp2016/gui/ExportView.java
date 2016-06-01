@@ -10,8 +10,18 @@ import java.awt.TextArea;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -30,9 +40,11 @@ public class ExportView extends JFrame{
 	private StorageClass sc;
 	private static final String name = "MyKeyStorage.p12";
 	private static final String mypass = "mystorage";
+	private ArrayList<String> allSolutions;
+	private JCheckBox chBox;
 	
 	public void fillAllSolutions(){
-		ArrayList<String> allSolutions = new ArrayList<String>();
+		allSolutions = new ArrayList<String>();
 		//System.out.println(storeName+"  "+storePass);
 		  sc = new StorageClass(name,mypass);
 		allSolutions = sc.viewKeyAlies(name,mypass); 
@@ -76,7 +88,7 @@ public class ExportView extends JFrame{
 		Panel plate = new Panel(new GridLayout(1, 2));
 		exportB = new JButton ("Export");
 		exportB.setSize(2,2);
-		exportB.setBackground(Color.yellow);
+		exportB.setBackground(Color.orange);
 		exportB.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(exportB);
 		exportB.addActionListener(new ActionListener() {
@@ -93,14 +105,14 @@ public class ExportView extends JFrame{
 					errorLabel.setBackground(Color.RED);
 				}
 				else{
-					String extStr = getFileExtension(pass.getText());
+					String extStr = getFileExtension(txt.getText());
 					if( (extStr == null) && (fileName.getText().length() == 0)){
 						errorLabel.setText("You must choose file! ");
 						errorLabel.setBackground(Color.RED);
 					}
 					else{
 						if(extStr != null){
-							if(!extStr.equals(".p12")) {
+							if(!extStr.equals("p12")) {
 								errorLabel.setText("File extension must be .p12! ");
 								errorLabel.setBackground(Color.RED);	
 						}
@@ -112,9 +124,52 @@ public class ExportView extends JFrame{
 						
 					}
 				}
+				int selectedItem = solutionBox.getSelectedIndex();
+				String keyAlias = allSolutions.get(selectedItem);
+				System.out.println("usooo");
 				// fje za eksport
 			if(fullPath.length() > 0) {
-				//exportKey(fullPath,pass.getText(),"keyalias");
+				try {
+					if(chBox.isSelected())
+						sc.exportKeyAES(fullPath,pass.getText(),keyAlias);
+					else 
+						sc.exportKey(fullPath,pass.getText(),keyAlias);
+					fw = new FirstWind();
+					 fw.setVisible(true);
+					 fw.ex = true;
+					 dispose();
+				} catch (UnrecoverableKeyException e1) {
+					errorLabel.setText("You must choose file! ");
+					errorLabel.setBackground(Color.RED);
+					e1.printStackTrace();
+				} catch (InvalidKeyException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (KeyStoreException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchAlgorithmException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (CertificateException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchPaddingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalBlockSizeException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (BadPaddingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 			}
 		});
@@ -148,7 +203,7 @@ public class ExportView extends JFrame{
 		plate.add(l1);
 		plate.add(txt);
 		chooseB.setSize(2,2);
-		chooseB.setBackground(Color.yellow);
+		chooseB.setBackground(Color.ORANGE);
 		chooseB.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(chooseB);
 		
@@ -175,8 +230,10 @@ public class ExportView extends JFrame{
 		plate.add(solutionBox);
 		plate.add(new Label());
 		
+		chBox = new JCheckBox("Protect via AES alg");
+		chBox.setFont(new Font(null,Font.BOLD, 15));
 		plate.add(new Label());
-		plate.add(new Label());
+		plate.add(chBox);
 		
 		chooseB.addActionListener(new ActionListener() {
 			@Override
@@ -194,7 +251,7 @@ public class ExportView extends JFrame{
 	public ExportView() {
 		super("X.509 Authentication Service: EXPORT KEY PAIR");
 		fillAllSolutions();
-		setBounds(300,150,700,150);
+		setBounds(300,150,700,180);
 		setResizable(false);
 		errorLabel = new Label(" ", Label.LEFT);
 		errorLabel.setFont(new Font(null,Font.BOLD, 15));
