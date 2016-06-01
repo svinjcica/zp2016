@@ -119,7 +119,7 @@ public class ExportView extends JFrame{
 							else fullPath = txt.getText();
 						}
 						else{
-							fullPath = txt.getText() +"\\"+fileName.getText();
+							fullPath = txt.getText() +"\\"+fileName.getText()+".p12";
 						}
 						
 					}

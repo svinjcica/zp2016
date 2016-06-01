@@ -387,7 +387,7 @@ public class StorageClass
   		  
   		  keystore.setKeyEntry(keyAlias, key, keyPass.toCharArray(), certChain); 
   		
-  		  FileOutputStream fos = new FileOutputStream(storeName + ".p12");
+  		  FileOutputStream fos = new FileOutputStream(storeName);
   		  keystore.store(fos, storePass.toCharArray());
   		  fos.close();
         }    

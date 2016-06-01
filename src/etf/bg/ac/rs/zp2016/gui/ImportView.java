@@ -211,7 +211,7 @@ public class ImportView extends JFrame{
 			public void actionPerformed(ActionEvent e) {	
 				//setEnabled(false);
 				System.out.println(txt.getText()+"  "+pass.getText());
-				fillAllSolutions(txt.getText(), "pass");
+				fillAllSolutions(txt.getText(), pass.getText());
 				// fje za eksport
 			}
 		});
