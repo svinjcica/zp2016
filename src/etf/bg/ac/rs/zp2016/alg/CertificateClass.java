@@ -173,19 +173,19 @@ public class CertificateClass
     
           switch(i)
           {
-          case 0:  subAltNames.add(new GeneralName(new DNSName("Neki.domen.com")));//0
+          case 0:  subAltNames.add(new GeneralName(new DNSName(value)));//0
           break;
           
-          case 1:  subAltNames.add(new GeneralName(new IPAddressName("187.0.0.1"))); //1
+          case 1:  subAltNames.add(new GeneralName(new IPAddressName(value))); //1
           break;
           
-          case 2: subAltNames.add(new GeneralName(new RFC822Name("Neki.domen.com")));//2
+          case 2: subAltNames.add(new GeneralName(new RFC822Name(value)));//2
           break;
           
-          case 3:   subAltNames.add(new GeneralName(new URIName("urn:isbn:0-486-27557-4")));//3
+          case 3:   subAltNames.add(new GeneralName(new URIName(value)));//3
           break;
           
-          case 4: subAltNames.add(new GeneralName(new OIDName("2.5.29.31"))); //4
+          case 4: subAltNames.add(new GeneralName(new OIDName(value))); //4
           break;
           }
          
