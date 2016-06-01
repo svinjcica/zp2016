@@ -27,7 +27,9 @@ import java.util.Enumeration;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 
 import sun.misc.BASE64Encoder;
 
@@ -39,6 +41,8 @@ public class StorageClass
 	private static final String pass = "mystorage";
 	private String keyStoreName;
 	private String keyStorePass;
+	private SecretKey sKey;
+	private static String cipheredPass;
 	
 	public StorageClass()
 	{
@@ -245,12 +249,23 @@ public class StorageClass
 	}
 	
 	
-	public void exportKey(String storeName,String storePass,String keyAlias) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, UnrecoverableKeyException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
+	public void exportKeyAES(String storeName,String storePass,String keyAlias) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, UnrecoverableKeyException
 	{
 		
 		Certificate cert=null;
 		String keyPass="pass";
-		//Cipher c = Cipher.getInstance("AES");
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+		keyGenerator.init(128);
+		SecretKey secretKey = keyGenerator.generateKey();
+		this.sKey = secretKey;
+		  
+		Cipher c = null;
+		try {
+			c = Cipher.getInstance("AES");
+		} catch (NoSuchPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
       
 		//pravimo novi p12 fajl za export
 	    KeyStore keystore = KeyStore.getInstance("pkcs12");
@@ -263,24 +278,82 @@ public class StorageClass
 	    
 	    
   		  Certificate[] certChain = new Certificate[1];  
-  		  cert = mykeystore.getCertificate(keyAlias); 
-  		  //PublicKey pkey = mykeystore.getCertificate(keyAlias).getPublicKey();
-  		 // c.init(Cipher.ENCRYPT_MODE, pkey);
   		  
-  		  //cert = mykeystore.getCertificate(keyAlias); ;
-  		 // byte[] contentC = cert.toString().getBytes();
-  		  //contentC = c.doFinal(contentC);
-  		 // Certificate cipheredC = CertificateFactory.getInstance("X509").generateCertificate(new ByteArrayInputStream(contentC));
-  		 //certChain[0] = cipheredC;
+  		  cert = mykeystore.getCertificate(keyAlias); 
   		  certChain[0] = cert;
   		  
-  		  keystore.setKeyEntry(keyAlias, key, keyPass.toCharArray(), certChain); 
+  		  try {
+			c.init(Cipher.ENCRYPT_MODE, this.sKey);
+		} catch (InvalidKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+  		  
+  		 keystore.setKeyEntry(keyAlias, key, keyPass.toCharArray(), certChain); 
+  		 
+  		// System.out.print(keystore.toString());
+  		 byte[] cipheredPass = storePass.getBytes();
+  		 try {
+  			cipheredPass = c.doFinal(cipheredPass);
+ 			
+ 		} catch (IllegalBlockSizeException e) {
+ 			// TODO Auto-generated catch block
+ 			e.printStackTrace();
+ 		} catch (BadPaddingException e) {
+ 			// TODO Auto-generated catch block
+ 			e.printStackTrace();
+ 		}
   		
-  		  FileOutputStream fos = new FileOutputStream(storeName + ".p12");
-  		  keystore.store(fos, storePass.toCharArray());
+  		this.cipheredPass = cipheredPass.toString();
+  		//System.out.println(this.cipheredPass);
+  		FileOutputStream fos = new FileOutputStream(storeName);
+  	    keystore.store(fos, this.cipheredPass.toCharArray());
   		  fos.close();
-        }    
+     } 
 	
+	
+	public void openCipheredContent(String storeName,String storePass,String keyAlias) throws NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, KeyStoreException
+	{
+		/*Cipher c = null;
+		try {
+			c = Cipher.getInstance("AES");
+		} catch (NoSuchPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		  try {
+				c.init(Cipher.DECRYPT_MODE, this.sKey);
+			} catch (InvalidKeyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+      
+		  KeyStore keystore = KeyStore.getInstance("pkcs12");
+		 // keystore.load(new FileInputStream(storeName), storePass.toCharArray());
+		  
+		  byte[] uncipheredPass = storePass.getBytes();
+		  
+		  try {
+	  			uncipheredPass = c.doFinal(uncipheredPass);
+	 			
+	 		} catch (IllegalBlockSizeException e) {
+	 			// TODO Auto-generated catch block
+	 			e.printStackTrace();
+	 		} catch (BadPaddingException e) {
+	 			// TODO Auto-generated catch block
+	 			e.printStackTrace();
+	 		}
+		  
+		  System.out.println(uncipheredPass.toString());*/
+
+		  KeyStore keystore = KeyStore.getInstance("pkcs12");
+		   keystore.load(new FileInputStream(storeName), cipheredPass.toCharArray());
+		
+		  Certificate cert = keystore.getCertificate(keyAlias);
+		   System.out.print(cert);
+		
+	}
 	
 	
 	
