@@ -31,6 +31,8 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
+import etf.bg.ac.rs.zp2016.gui.MainProg;
+
 import sun.misc.BASE64Encoder;
 
 public class StorageClass 
@@ -212,6 +214,65 @@ public class StorageClass
             
 	}
 	
+	public void importKeyAES(String storeName,String storePass,String keyName,String newKeyName) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, UnrecoverableKeyException
+	{
+		Certificate cert=null;
+		String keyPass="pass";
+
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+		keyGenerator.init(128);
+		if(MainProg.secretKey == null )MainProg.secretKey = keyGenerator.generateKey();
+		this.sKey = MainProg.secretKey;
+		
+		Cipher c = null;
+		try {
+			c = Cipher.getInstance("AES");
+		} catch (NoSuchPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		 try {
+				c.init(Cipher.ENCRYPT_MODE, this.sKey);
+			} catch (InvalidKeyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	  		  
+	  		 byte[] cipheredPass = storePass.getBytes();
+	  		 try {
+	  			cipheredPass = c.doFinal(cipheredPass);
+	 			
+	 		} catch (IllegalBlockSizeException e) {
+	 			// TODO Auto-generated catch block
+	 			e.printStackTrace();
+	 		} catch (BadPaddingException e) {
+	 			// TODO Auto-generated catch block
+	 			e.printStackTrace();
+	 		}
+	  		
+	  		this.cipheredPass = cipheredPass.toString();
+
+	    KeyStore keystore = KeyStore.getInstance("pkcs12");
+	    keystore.load(new FileInputStream(storeName), this.cipheredPass.toCharArray());
+	    
+          Key key = keystore.getKey(keyName, keyPass.toCharArray());
+          
+          KeyStore myKeyStore = KeyStore.getInstance("pkcs12");
+   		  myKeyStore.load(new FileInputStream(this.name), this.pass.toCharArray());
+  		
+  		  Certificate[] certChain = new Certificate[1];  
+  		  certChain[0] = keystore.getCertificate(keyName);  
+  		  myKeyStore.setKeyEntry(newKeyName, key, keyPass.toCharArray(), certChain); 
+  		
+  		  FileOutputStream fos = new FileOutputStream(this.name);
+  		  myKeyStore.store(fos, this.pass.toCharArray());
+  		  fos.close();
+            
+	}
+	
+	
+	
 	public ArrayList<String> viewKeyAlies(String storeName,String storePass)
 	{
 		 ArrayList<String> keys = new ArrayList<String>();
@@ -256,8 +317,8 @@ public class StorageClass
 		String keyPass="pass";
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
 		keyGenerator.init(128);
-		SecretKey secretKey = keyGenerator.generateKey();
-		this.sKey = secretKey;
+		if(MainProg.secretKey == null )MainProg.secretKey = keyGenerator.generateKey();
+		this.sKey = MainProg.secretKey;
 		  
 		Cipher c = null;
 		try {
