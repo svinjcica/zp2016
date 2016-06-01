@@ -19,6 +19,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -37,7 +38,7 @@ public class ImportView extends JFrame{
 	private FirstWind fw;
 	private ArrayList<String> allSolutions;
 	public JComboBox<String> solutionBox = new JComboBox<String>();
-	
+	private JCheckBox chBox;
 	
 	public void fillAllSolutions(String storeName,String storePass){
 		allSolutions = new ArrayList<String>();
@@ -122,9 +123,14 @@ public class ImportView extends JFrame{
 						else {
 							
 							  try {
+								 
 								int selectedItem = solutionBox.getSelectedIndex();
 								String keyAlias = allSolutions.get(selectedItem);
-								sc.importKey(sc.getKeyStoreName(),sc.getKeyStorePass(),keyAlias,name.getText());
+								 if(chBox.isSelected())
+										sc.importKeyAES(sc.getKeyStoreName(),sc.getKeyStorePass(),keyAlias,name.getText());
+										
+									else 
+										sc.importKey(sc.getKeyStoreName(),sc.getKeyStorePass(),keyAlias,name.getText());
 								fw = new FirstWind();
 								fw.setVisible(true);
 								fw.ex = true;
@@ -203,7 +209,9 @@ public class ImportView extends JFrame{
 		plate.add(new Label());
 		
 		plate.add(errorLabel);
-		plate.add(new Label());
+		chBox = new JCheckBox("Protected via AES alg");
+		chBox.setFont(new Font(null,Font.BOLD, 15));
+		plate.add(chBox);
 		//plate.add(new Label());
 		
 		confirmPass.addActionListener(new ActionListener() {
@@ -212,7 +220,7 @@ public class ImportView extends JFrame{
 				//setEnabled(false);
 				System.out.println(txt.getText()+"  "+pass.getText());
 				fillAllSolutions(txt.getText(), pass.getText());
-				// fje za eksport
+				
 			}
 		});
 		
