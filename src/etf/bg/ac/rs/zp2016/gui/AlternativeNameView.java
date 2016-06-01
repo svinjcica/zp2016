@@ -79,20 +79,30 @@ public class AlternativeNameView extends JFrame{
 				
 				@Override
 				public void actionPerformed(ActionEvent e) {
+					int selectedValue = 0;
+					boolean checkedRB = false;
+					for(JRadioButton r: radioBList){
+						if(r.isSelected()){
+							checkedRB =  true;
+							break;
+						}
+						selectedValue++;
+					}
+					
 					if( myTextFiled.getText().length() == 0){
 						errorLabel.setText("You must input name!! ");
+						errorLabel.setBackground(Color.RED);
+					}
+					else if( !checkedRB){
+						errorLabel.setText("You didn't choose any alternative name!! ");
 						errorLabel.setBackground(Color.RED);
 					}
 					else{
 						try {
 							int selectedCritical = yesNoCritical.getSelectedIndex();
 							if(selectedCritical == 1) myGKW.cert.setAltNamesCritical(true);
-							int selectedValue = 0;
+							
 							myGKW.cert.setAltNameExt(true);
-							for(JRadioButton r: radioBList){
-								if(r.isSelected()) break;
-								selectedValue++;
-							}
 							System.out.println(""+selectedValue+myTextFiled.getText());
 							myGKW.cert.subjectAltNames(selectedValue, myTextFiled.getText());
 							myGKW.setEnabled(true);
@@ -127,7 +137,7 @@ public class AlternativeNameView extends JFrame{
 	 
 	 public AlternativeNameView(GenerateKeyWind myGKW) {
 	    	super("Alternative names");
-	 		setBounds(300,150,500,250);
+	 		setBounds(300,150,600,250);
 	 		setResizable(false);
 	 		add(initRadioB(),BorderLayout.CENTER);
 	 		add(createPanelB(),BorderLayout.SOUTH);
