@@ -124,7 +124,7 @@ public class StorageClass
 	{
 		Certificate cert=null;
 		String keyPass="pass";
-		String ispis = "Pregled postojecih sertifikata:\n";
+		String ispis = "";
 
 	    KeyStore keystore = KeyStore.getInstance("pkcs12");
 	    keystore.load(new FileInputStream(storageName), pass.toCharArray());

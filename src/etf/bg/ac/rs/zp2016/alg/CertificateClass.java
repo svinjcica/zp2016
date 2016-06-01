@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
@@ -32,13 +33,23 @@ import sun.security.x509.CertificateSubjectName;
 import sun.security.x509.CertificateValidity;
 import sun.security.x509.CertificateVersion;
 import sun.security.x509.CertificateX509Key;
+import sun.security.x509.DNSName;
 import sun.security.x509.Extension;
+import sun.security.x509.GeneralName;
+import sun.security.x509.GeneralNameInterface;
+import sun.security.x509.GeneralNames;
+import sun.security.x509.IPAddressName;
 import sun.security.x509.KeyUsageExtension;
+import sun.security.x509.OIDName;
+import sun.security.x509.OtherName;
+import sun.security.x509.RFC822Name;
 import sun.security.x509.SubjectAlternativeNameExtension;
+import sun.security.x509.URIName;
 import sun.security.x509.X500Name;
 import sun.security.x509.X509CertImpl;
 import sun.security.x509.X509CertInfo;
 import java.io.File;
+
 
 
 public class CertificateClass  
@@ -50,7 +61,6 @@ public class CertificateClass
     private int serialNum;
     private String CN, OU, O, L, ST, C, E;
     //za dodavanje-PLUS GETERI I SETERI ZA PRIVATE POLJA
-    private String altNames;
     private boolean altNamesCritical,keyUsageCritical,basicCritical;
     public boolean[] keyUsagePolicies = new boolean[9];
     //0-certificate signing,1-CRL sign,2-data  encipherment,3-decipher only,4-digital signature,5-encipher only,6-key agreement,7-key encipherment,8-non repudiation
@@ -58,9 +68,21 @@ public class CertificateClass
     private boolean CA;
     private boolean altNameExt,basicExt,keyExt;//indikatori za unesene ekstenzije
     
+    private GeneralNames subAltNames = new GeneralNames();
+    
     private KeyPair pair;
     
-    public boolean isAltNameExt() {
+    public GeneralNames getSubAltNames() {
+		return subAltNames;
+	}
+
+
+	public void setSubAltNames(GeneralNames subAltNames) {
+		this.subAltNames = subAltNames;
+	}
+
+
+	public boolean isAltNameExt() {
 		return altNameExt;
 	}
 
@@ -144,6 +166,31 @@ public class CertificateClass
 	public void setKeyUsagePolicies(boolean[] keyUsagePolicies) {
 		this.keyUsagePolicies = keyUsagePolicies;
 	}
+	
+	public void subjectAltNames(int i,String value) throws IOException
+	{ 
+        //GeneralNames subAltNames = new GeneralNames(); 
+    
+          switch(i)
+          {
+          case 0:  subAltNames.add(new GeneralName(new DNSName("Neki.domen.com")));//0
+          break;
+          
+          case 1:  subAltNames.add(new GeneralName(new IPAddressName("187.0.0.1"))); //1
+          break;
+          
+          case 2: subAltNames.add(new GeneralName(new RFC822Name("Neki.domen.com")));//2
+          break;
+          
+          case 3:   subAltNames.add(new GeneralName(new URIName("urn:isbn:0-486-27557-4")));//3
+          break;
+          
+          case 4: subAltNames.add(new GeneralName(new OIDName("2.5.29.31"))); //4
+          break;
+          }
+         
+        //return subAltNames; 
+    } 
 
 
 	public X509Certificate generateCertificate() throws GeneralSecurityException, IOException
@@ -175,28 +222,21 @@ public class CertificateClass
 		  AlgorithmId alg = new AlgorithmId(AlgorithmId.sha1WithRSAEncryption_OIW_oid);
 		  info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(alg));
 		  
-		  CertificateExtensions ext = new CertificateExtensions();
-	
-		  /*GeneralNames g = new GeneralNames();
- 	      GeneralName gr= new GeneralName(new DerValue(DerValue.tag_OctetString,"AAAAaaaaaaaaaaa".getBytes()));
-	 	  g.add(gr);
-		    
-		   ext.set(SubjectAlternativeNameExtension.NAME, new SubjectAlternativeNameExtension(g));*/
-         
+		  CertificateExtensions ext = new CertificateExtensions();   
+		  
+		  //settin SubjectAlternativeNames extension
+		  if(this.isAltNameExt())
+		  {
+ 	      ext.set(SubjectAlternativeNameExtension.NAME, new SubjectAlternativeNameExtension(this.isAltNamesCritical(),this.subAltNames));
+		  }
+		  
 		  //setting Key usage extension
 		  if(this.isKeyExt())
 		  {
 		   KeyUsageExtension kue = new KeyUsageExtension(keyUsagePolicies);
 		   ext.set(KeyUsageExtension.NAME, new KeyUsageExtension(this.isKeyUsageCritical(),kue.getExtensionValue()));
 		  }
-		  
-		  //setting Alternative names extension-glup nacin ali trenutno ne znam drugacije :(
-		 /* if(this.isAltNameExt())
-		  {
-		   SubjectAlternativeNameExtension san = new SubjectAlternativeNameExtension();
-		   byte[] altNamesValue = new DerValue(DerValue.tag_OctetString, altNames.getBytes()).toByteArray();
-		   ext.set(SubjectAlternativeNameExtension.NAME, new Extension(san.getExtensionId(),altNamesCritical,altNamesValue));
-		  }*/
+
 		  
 		 // setting Basic contraints extension
 		 if(this.isBasicExt())
@@ -218,6 +258,8 @@ public class CertificateClass
 		  info.set(CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, alg);
 		  certificate = new X509CertImpl(info);
 		  certificate.sign(priv, algorithm);
+		  
+		  System.out.println(certificate.toString());
 		  	  
 		  return certificate;	 	
     	
@@ -231,16 +273,6 @@ public class CertificateClass
 
 	public void setPair(KeyPair pair) {
 		this.pair = pair;
-	}
-
-
-	public String getAltNames() {
-		return altNames;
-	}
-
-
-	public void setAltNames(String altNames) {
-		this.altNames = altNames;
 	}
 
 
