@@ -50,7 +50,7 @@ public class FirstWind extends JFrame{
 		allSolutions.add("Import key pair");
 		allSolutions.add("Export key pair");
 		allSolutions.add("View details of all existing pairs");
-		allSolutions.add("Sign certificate");
+	//	allSolutions.add("Sign certificate");
 		allSolutions.add("Export certificate");
 		solutionBox.setBackground(Color.ORANGE);
 	}
@@ -74,8 +74,8 @@ public class FirstWind extends JFrame{
 				case 1: secW = new ImportView(); break;
 				case 2: secW = new ExportView();break;
 				case 3:	secW = new ShowAllKeys(); break;
-				case 4:
-				case 5: secW = new CertificateExport();break;
+			//	case 4:
+				case 4: secW = new CertificateExport();break;
 				
 				}
 				
