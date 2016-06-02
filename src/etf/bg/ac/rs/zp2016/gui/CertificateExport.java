@@ -34,23 +34,23 @@ public class CertificateExport extends JFrame{
 	private JFileChooser fc;
 	private Label errorLabel = new Label("");
 	private TextField txt, fileName, name;
-	private JButton importB, exitB, confirmPass;
+	private JButton exportB, exitB, confirmPass;
 	private FirstWind fw;
 	private String extStr;
 	public JComboBox<String> solutionBox = new JComboBox<String>();
-	String fullPath ;
+	private String fullPath ;
+	private ArrayList<String> allSolutions;
 	
 	public void fillAllSolutions(String storeName,String storePass){
-		ArrayList<String> allSolutions = new ArrayList<String>();
-		System.out.println(storeName+"  "+storePass);
-		  sc = new StorageClass();
+		allSolutions = new ArrayList<String>();
+		//System.out.println(storeName+"  "+storePass);
+		  sc = new StorageClass(storeName,storePass);
 		allSolutions = sc.viewKeyAlies(storeName,storePass); 
 		
 		solutionBox.setBackground(Color.ORANGE);
 		if(allSolutions != null)
 			for(int i = 0; i < allSolutions.size(); i++){	
 				solutionBox.addItem(allSolutions.get(i));
-				//solutionBox.addItem("Ma");
 				solutionBox.addActionListener(new ActionListener() {
 			        @Override
 			        public void actionPerformed(ActionEvent event) {
@@ -67,13 +67,13 @@ public class CertificateExport extends JFrame{
 		fc.setCurrentDirectory(new java.io.File("my own home directory"));
 		fc.setDialogTitle("Choose file");
 		//fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("PKCS #12", "p12", "pkcs12");
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("CER", "cer", "cer");
 		fc.setFileFilter(filter);
 		if(fc.showOpenDialog(open) == JFileChooser.APPROVE_OPTION){
 		
 		}
 		if(fc.getSelectedFile()!= null) {
-			System.out.println(fc.getSelectedFile().getAbsolutePath());
+			//System.out.println(fc.getSelectedFile().getAbsolutePath());
 			return fc.getSelectedFile().getAbsolutePath();
 			
 		}
@@ -88,40 +88,52 @@ public class CertificateExport extends JFrame{
 	
 	public Panel plateImportB(){
 		Panel plate = new Panel(new GridLayout(1, 2));
-		importB = new JButton ("Import");
-		importB.setSize(2,2);
-		importB.setBackground(Color.orange);
-		importB.setFont(new Font(null,Font.BOLD, 15));
-		plate.add(importB);
-		importB.addActionListener(new ActionListener() {
+		exportB = new JButton ("Export");
+		exportB.setSize(2,2);
+		exportB.setBackground(Color.orange);
+		exportB.setFont(new Font(null,Font.BOLD, 15));
+		plate.add(exportB);
+		exportB.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {	
 				//setEnabled(false);
-				
+				 extStr = getFileExtension(txt.getText());
+				 
 				if(txt.getText().length() == 0) {
 					errorLabel.setText("You must choose file!!");
 					errorLabel.setBackground(Color.RED);
+					return;
 				}
-				else if( extStr != null){
+				 if( extStr != null){
 					
-						if(!extStr.equals("p12")) {
-							errorLabel.setText("File extension must be .p12! ");
-							errorLabel.setBackground(Color.RED);	
+						if(!extStr.equals("cer")) {
+							errorLabel.setText("File extension must be .cer! ");
+							errorLabel.setBackground(Color.RED);
+							return;
 						}
 					}
-				else if(fileName.getText().length() == 0){
+				if(fileName.getText().length() == 0 && extStr == null){
 					errorLabel.setText("You must input file! ");
 					errorLabel.setBackground(Color.RED);
+					return;
 				}
-				else{
-							//import kljuceva
-							 //prvo napravimo novi fajl za import
+				
 							
 							if(extStr!=null) fullPath = txt.getText();
-							else fullPath = txt.getText() +"\\"+ fileName.getText()+".p12";
+							else fullPath = txt.getText() +"\\"+ fileName.getText();
+							try {
+								int selS = solutionBox.getSelectedIndex();
+								String selecAli = solutionBox.getItemAt(selS);
+								sc.exportCertificate(fullPath, selecAli);
+								fw = new FirstWind();
+								fw.setVisible(true);
 							
-				}
-					
+								fw.ex = true;
+								 dispose();
+							} catch (CertificateException | IOException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
 				
 				// fje za eksport
 			}
@@ -197,7 +209,7 @@ public class CertificateExport extends JFrame{
 				//setEnabled(false);
 				String str = chooseFile();
 				txt.setText(str);
-				String extStr = getFileExtension(txt.getText());
+				//String extStr = getFileExtension(txt.getText());
 				// fje za eksport
 			}
 		});
@@ -209,7 +221,7 @@ public class CertificateExport extends JFrame{
 		
 		setBounds(300,150,700,150);
 		setResizable(false);
-		errorLabel = new Label(" ", Label.LEFT);
+	//	errorLabel = new Label(" ", Label.LEFT);
 		
 		errorLabel.setFont(new Font(null,Font.BOLD, 15));
 		txt =  new TextField();

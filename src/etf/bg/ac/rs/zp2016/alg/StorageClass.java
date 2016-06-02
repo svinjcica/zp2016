@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyPair;
@@ -30,6 +31,10 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 import etf.bg.ac.rs.zp2016.gui.MainProg;
 
@@ -239,7 +244,9 @@ public class StorageClass
 				e.printStackTrace();
 			}
 	  		  
-	  		 byte[] cipheredPass = storePass.getBytes();
+	  		// byte[] cipheredPass = storePass.getBytes();
+		     byte[] cipheredPass = new sun.misc.BASE64Decoder().decodeBuffer(storePass);
+            
 	  		 try {
 	  			cipheredPass = c.doFinal(cipheredPass);
 	 			
@@ -251,9 +258,9 @@ public class StorageClass
 	 			e.printStackTrace();
 	 		}
 	  		
-	  		this.cipheredPass = cipheredPass.toString();
-	  		 System.out.println("IMPORT: "+this.cipheredPass);
-	  		 System.out.println("IMPORT KLJUC: "+this.sKey);
+	  		//this.cipheredPass = cipheredPass.toString();
+	  		 this.cipheredPass = new sun.misc.BASE64Encoder().encode(cipheredPass);
+	  		
 
 	    KeyStore keystore = KeyStore.getInstance("pkcs12");
 	    keystore.load(new FileInputStream(storeName), this.cipheredPass.toCharArray());
@@ -345,7 +352,15 @@ public class StorageClass
 					e.printStackTrace();
 				}
 		  		  
-		  	byte[] cipheredPass = storePass.getBytes();
+		  //	byte[] cipheredPass = storePass.getBytes();
+			 byte[] cipheredPass = null;
+			try {
+				cipheredPass = new sun.misc.BASE64Decoder().decodeBuffer(storePass);
+			} catch (IOException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+			 
 		  	try {
 		  	   cipheredPass = c.doFinal(cipheredPass);
 		 			
@@ -357,7 +372,14 @@ public class StorageClass
 		 			e.printStackTrace();
 		 		}
 		  		
-		  	this.cipheredPass = cipheredPass.toString();
+		  	/*try {
+				this.cipheredPass = new String(cipheredPass, "UTF-8");
+			} catch (UnsupportedEncodingException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}*/
+		  	this.cipheredPass = new sun.misc.BASE64Encoder().encode(cipheredPass);
+		  	
 		try {
 			keystore = KeyStore.getInstance("pkcs12");
 		} catch (KeyStoreException e) {
@@ -434,7 +456,8 @@ public class StorageClass
   		 keystore.setKeyEntry(keyAlias, key, keyPass.toCharArray(), certChain); 
   		 
   		// System.out.print(keystore.toString());
-  		 byte[] cipheredPass = storePass.getBytes();
+  		// byte[] cipheredPass = storePass.getBytes();
+  		 byte[] cipheredPass = new sun.misc.BASE64Decoder().decodeBuffer(storePass);
   		 try {
   			cipheredPass = c.doFinal(cipheredPass);
  			
@@ -446,58 +469,16 @@ public class StorageClass
  			e.printStackTrace();
  		}
   		
-  		this.cipheredPass = cipheredPass.toString();
-  	
-  		 System.out.println("EXPORT: "+this.cipheredPass);
-  		 System.out.println("EXPORT KLJUC: "+this.sKey);
+  		//this.cipheredPass = new String(cipheredPass, "UTF-8");
+  		 
+  		 this.cipheredPass = new sun.misc.BASE64Encoder().encode(cipheredPass);
+  		
   		FileOutputStream fos = new FileOutputStream(storeName);
   	    keystore.store(fos, this.cipheredPass.toCharArray());
   		  fos.close();
      } 
 	
 	
-	public void openCipheredContent(String storeName,String storePass,String keyAlias) throws NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, KeyStoreException
-	{
-		/*Cipher c = null;
-		try {
-			c = Cipher.getInstance("AES");
-		} catch (NoSuchPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		  try {
-				c.init(Cipher.DECRYPT_MODE, this.sKey);
-			} catch (InvalidKeyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-      
-		  KeyStore keystore = KeyStore.getInstance("pkcs12");
-		 // keystore.load(new FileInputStream(storeName), storePass.toCharArray());
-		  
-		  byte[] uncipheredPass = storePass.getBytes();
-		  
-		  try {
-	  			uncipheredPass = c.doFinal(uncipheredPass);
-	 			
-	 		} catch (IllegalBlockSizeException e) {
-	 			// TODO Auto-generated catch block
-	 			e.printStackTrace();
-	 		} catch (BadPaddingException e) {
-	 			// TODO Auto-generated catch block
-	 			e.printStackTrace();
-	 		}
-		  
-		  System.out.println(uncipheredPass.toString());*/
-
-		  KeyStore keystore = KeyStore.getInstance("pkcs12");
-		   keystore.load(new FileInputStream(storeName), cipheredPass.toCharArray());
-		
-		  Certificate cert = keystore.getCertificate(keyAlias);
-		   System.out.print(cert);
-		
-	}
 	
 	
 	public void exportKey(String storeName,String storePass,String keyAlias) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, FileNotFoundException, IOException, UnrecoverableKeyException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException
@@ -604,7 +585,6 @@ public class StorageClass
 	public void setKeyStoreName(String keyStoreName) {
 		this.keyStoreName = keyStoreName;
 	}
-	
 	
 
 }
