@@ -44,7 +44,13 @@ public class ImportView extends JFrame{
 		allSolutions = new ArrayList<String>();
 		System.out.println(storeName+"  "+storePass);
 		  sc = new StorageClass(txt.getText(),pass.getText());
-		allSolutions = sc.viewKeyAlies(storeName,storePass); 
+		  if(chBox.isSelected()){
+			  chBox.setEnabled(false);
+		  allSolutions = sc.viewKeyAliesAES(storeName,storePass); 
+			
+		  }else{
+				allSolutions = sc.viewKeyAlies(storeName,storePass); 
+		  }
 		
 		solutionBox.setBackground(Color.ORANGE);
 		if(allSolutions != null)
