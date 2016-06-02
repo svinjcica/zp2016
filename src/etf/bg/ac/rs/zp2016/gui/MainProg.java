@@ -3,7 +3,7 @@ package etf.bg.ac.rs.zp2016.gui;
 import javax.crypto.SecretKey;
 
 public class MainProg {
-	public static  SecretKey secretKey;
+	public static  SecretKey secretKey = null;
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 	

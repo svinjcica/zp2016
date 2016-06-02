@@ -252,6 +252,8 @@ public class StorageClass
 	 		}
 	  		
 	  		this.cipheredPass = cipheredPass.toString();
+	  		 System.out.println("IMPORT: "+this.cipheredPass);
+	  		 System.out.println("IMPORT KLJUC: "+this.sKey);
 
 	    KeyStore keystore = KeyStore.getInstance("pkcs12");
 	    keystore.load(new FileInputStream(storeName), this.cipheredPass.toCharArray());
@@ -285,6 +287,85 @@ public class StorageClass
 		}
 		 try {
 			keystore.load(new FileInputStream(storeName), storePass.toCharArray());
+		} catch (NoSuchAlgorithmException | CertificateException
+				| IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		    
+		    int i=0;
+		    Enumeration aliases = null;
+			try {
+				aliases = keystore.aliases();
+			} catch (KeyStoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		    while(aliases.hasMoreElements()) 
+		    {
+		      String alias = (String)aliases.nextElement();
+	          keys.add(alias);
+	          
+		    }
+	  	if(!keys.isEmpty()) return keys;
+	  	else return null;
+	}
+	
+	
+	
+	public ArrayList<String> viewKeyAliesAES(String storeName,String storePass)
+	{
+		 ArrayList<String> keys = new ArrayList<String>();
+		 
+		 KeyStore keystore = null;
+		 
+		 KeyGenerator keyGenerator = null;
+		try {
+			keyGenerator = KeyGenerator.getInstance("AES");
+		} catch (NoSuchAlgorithmException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	     keyGenerator.init(128);
+	     if(MainProg.secretKey == null )MainProg.secretKey = keyGenerator.generateKey();
+		 this.sKey = MainProg.secretKey;
+			
+			Cipher c = null;
+			try {
+				c = Cipher.getInstance("AES");
+			} catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			 try {
+					c.init(Cipher.ENCRYPT_MODE, this.sKey);
+				} catch (InvalidKeyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		  		  
+		  	byte[] cipheredPass = storePass.getBytes();
+		  	try {
+		  	   cipheredPass = c.doFinal(cipheredPass);
+		 			
+		 	    } catch (IllegalBlockSizeException e) {
+		 			// TODO Auto-generated catch block
+		 			e.printStackTrace();
+		 		} catch (BadPaddingException e) {
+		 			// TODO Auto-generated catch block
+		 			e.printStackTrace();
+		 		}
+		  		
+		  	this.cipheredPass = cipheredPass.toString();
+		try {
+			keystore = KeyStore.getInstance("pkcs12");
+		} catch (KeyStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		 try {
+			keystore.load(new FileInputStream(storeName), this.cipheredPass.toCharArray());
 		} catch (NoSuchAlgorithmException | CertificateException
 				| IOException e) {
 			// TODO Auto-generated catch block
@@ -366,7 +447,9 @@ public class StorageClass
  		}
   		
   		this.cipheredPass = cipheredPass.toString();
-  		//System.out.println(this.cipheredPass);
+  	
+  		 System.out.println("EXPORT: "+this.cipheredPass);
+  		 System.out.println("EXPORT KLJUC: "+this.sKey);
   		FileOutputStream fos = new FileOutputStream(storeName);
   	    keystore.store(fos, this.cipheredPass.toCharArray());
   		  fos.close();
