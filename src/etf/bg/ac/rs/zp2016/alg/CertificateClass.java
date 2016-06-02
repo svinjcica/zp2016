@@ -259,7 +259,7 @@ public class CertificateClass
 		  certificate = new X509CertImpl(info);
 		  certificate.sign(priv, algorithm);
 		  
-		  System.out.println(certificate.toString());
+		//  System.out.println(certificate.toString());
 		  	  
 		  return certificate;	 	
     	
